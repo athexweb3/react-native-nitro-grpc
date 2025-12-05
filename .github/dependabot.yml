@@ -1,0 +1,13 @@
+version: 2
+
+updates:
+  - package-ecosystem: 'bun'
+    target-branch: 'main'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    ignore:
+      - dependency-name: 'react'
+      - dependency-name: 'react-native'
+      - dependency-name: '@react-native/gradle-plugin'
+      - dependency-name: '@types/react'

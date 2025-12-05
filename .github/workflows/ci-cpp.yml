@@ -1,0 +1,31 @@
+name: CI (C++)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'packages/react-native-grpc/cpp/**'
+      - 'packages/react-native-grpc/android/src/main/cpp/**'
+      - '.github/workflows/ci-cpp.yml'
+  pull_request:
+    paths:
+      - 'packages/react-native-grpc/cpp/**'
+      - 'packages/react-native-grpc/android/src/main/cpp/**'
+      - '.github/workflows/ci-cpp.yml'
+
+jobs:
+  validate_cpp:
+    name: Validate C++ (Clang-Format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check Formatting
+        # Only checks files, doesn't fix them. Fails if not formatted.
+        run: |
+          find packages/react-native-grpc/cpp packages/react-native-grpc/android/src/main/cpp \
+            -regex '.*\.\(cpp\|hpp\|cc\|cxx\|h\)' \
+            -exec clang-format --style=file --dry-run --Werror {} +

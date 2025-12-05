@@ -1,0 +1,22 @@
+name: 🏗️ Build Error
+description: Report a build or compilation error
+title: "🏗️ "
+labels: [🏗️ build-error]
+body:
+  - type: textarea
+    attributes:
+      label: Build Log
+      description: Paste the full error log here.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment
+      description: |
+        - OS:
+        - Node:
+        - Bun:
+        - Xcode/Android Studio:
+    validations:
+      required: true
