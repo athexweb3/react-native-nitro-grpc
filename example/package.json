@@ -21,11 +21,11 @@
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "20.0.0",
-    "@react-native-community/cli-platform-android": "20.0.0",
+    "@react-native-community/cli-platform-android": "20.0.2",
     "@react-native-community/cli-platform-ios": "20.0.0",
     "@react-native/babel-preset": "0.81.1",
     "@react-native/metro-config": "0.81.1",
-    "@react-native/typescript-config": "0.81.1",
+    "@react-native/typescript-config": "0.82.1",
     "@types/react": "^19.1.0",
     "react-native-builder-bob": "^0.40.16",
     "react-native-monorepo-config": "^0.1.9"
