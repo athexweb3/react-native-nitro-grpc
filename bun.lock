@@ -44,7 +44,7 @@
         "@react-native-community/cli-platform-ios": "20.0.0",
         "@react-native/babel-preset": "0.81.1",
         "@react-native/metro-config": "0.81.1",
-        "@react-native/typescript-config": "0.81.1",
+        "@react-native/typescript-config": "0.82.1",
         "@types/react": "^19.1.0",
         "react-native-builder-bob": "^0.40.16",
         "react-native-monorepo-config": "^0.1.9",
@@ -605,7 +605,7 @@
 
     "@react-native/normalize-colors": ["@react-native/normalize-colors@0.81.1", "", {}, "sha512-TsaeZlE8OYFy3PSWc+1VBmAzI2T3kInzqxmwXoGU4w1d4XFkQFg271Ja9GmDi9cqV3CnBfqoF9VPwRxVlc/l5g=="],
 
-    "@react-native/typescript-config": ["@react-native/typescript-config@0.81.1", "", {}, "sha512-6G8/aCy9HZvzfD6UdgnWFVDDkmL+UfYw1A9BJcB7sBp3J0J2X2BTZ3x2JQnYeI7e/QxiI3RravghS5e9EDxU5Q=="],
+    "@react-native/typescript-config": ["@react-native/typescript-config@0.82.1", "", {}, "sha512-kCTjmBg44p0kqU4xEMg7l6SNJyHWTHuTqiT9MpHasEYcnVpBWyEQsSQAiVKONHwcUWcAktrGVLE1dYGfBmPJ3Q=="],
 
     "@react-native/virtualized-lists": ["@react-native/virtualized-lists@0.81.1", "", { "dependencies": { "invariant": "^2.2.4", "nullthrows": "^1.1.1" }, "peerDependencies": { "@types/react": "^19.1.0", "react": "*", "react-native": "*" }, "optionalPeers": ["@types/react"] }, "sha512-yG+zcMtyApW1yRwkNFvlXzEg3RIFdItuwr/zEvPCSdjaL+paX4rounpL0YX5kS9MsDIE5FXfcqINXg7L0xuwPg=="],
 
