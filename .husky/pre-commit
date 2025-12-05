@@ -1,0 +1,14 @@
+# Add bun to PATH
+export PATH="$HOME/.bun/bin:$PATH"
+
+# Run linting and formatting on staged files
+bun lint-staged
+
+# Check C++ formatting
+find packages/react-native-grpc/cpp -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror --style=file
+
+# Check Typescript
+bun tsc
+
+# Run prepare script
+bun --filter="react-native-grpc" prepare

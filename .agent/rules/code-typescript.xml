@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rules>
+  <rule id="typescript-standards">
+    <constraints>
+      <constraint>No `any` or `unknown` casts without explicit inline justification.</constraint>
+      <constraint>Use `interface` for public APIs, `type` for internal unions/aliases.</constraint>
+      <constraint>Named exports only (NO default exports).</constraint>
+      <constraint>No `enum` (use union types: `type Status = 'OK' | 'ERROR'`).</constraint>
+      <constraint>Explicit return types for **all** functions.</constraint>
+      <constraint>Strict null checks enabled.</constraint>
+    </constraints>
+
+    <patterns>
+      <pattern name="HybridObject-Wrapper">
+        <description>Encapsulating Native Objects</description>
+        <do>Create a TypeScript class that holds the private HybridObject.</do>
+        <do>Expose a clean, idiomatic JS API (Promises, EventEmitters).</do>
+        <dont>Do not expose the raw HybridObject directly to the consumer.</dont>
+      </pattern>
+
+      <pattern name="Stream-Handling">
+        <description>Managing Async Data</description>
+        <do>Use standard event patterns (`on('data')`, `on('end')`).</do>
+        <do>Implement `destroy()` to explicitly clean up native resources.</do>
+        <do>Handle backpressure if possible.</do>
+      </pattern>
+      
+      <pattern name="Types">
+        <description>Type Definitions</description>
+        <do>Mirror gRPC types exactly (Status Codes, Metadata).</do>
+        <do>Use `Uint8Array` for binary payloads.</do>
+      </pattern>
+    </patterns>
+  </rule>
+</rules>

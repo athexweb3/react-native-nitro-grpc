@@ -1,0 +1,52 @@
+name: 🐛 Bug Report
+description: File a bug report
+title: "🐛 "
+labels: [🐛 bug]
+body:
+  - type: textarea
+    attributes:
+      label: What's happening?
+      description: Explain what you are trying to do and what happened instead.
+      placeholder: I tried to connect to a gRPC server but it crashed...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproducible Code
+      description: Share a small reproducible code snippet.
+      render: tsx
+      placeholder: |
+        const client = createGrpcClient(...);
+        const stream = client.unaryCall(...);
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Relevant log output
+      description: Paste any relevant native log output (Xcode/Android Studio).
+      render: shell
+      placeholder: |
+        LOG  [HybridGrpcClient] Connecting to...
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Device
+      description: Which device/OS are you seeing this on?
+      placeholder: iPhone 15 Pro (iOS 17.4)
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Library Version
+      description: Which version of react-native-grpc are you using?
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Additional information
+      options:
+        - label: I am using Expo
+        - label: I have searched for similar issues
+          required: true

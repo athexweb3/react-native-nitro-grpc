@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rules>
+  <rule id="project-context">
+    <description>react-native-grpc - High performance gRPC for React Native</description>
+    <requirements>
+      <tech-stack>
+        <item>React Native (0.76+)</item>
+        <item>TypeScript (Strict, no 'any')</item>
+        <item>Nitro Modules (HybridObject, JSI)</item>
+        <item>C++ 20 (Standard, Concepts, Ranges)</item>
+        <item>gRPC Core (1.59+)</item>
+        <item>Bun (Package Manager)</item>
+      </tech-stack>
+      <api-priority>
+        <item rank="1">gRPC Core C++ API (Official)</item>
+        <item rank="2">Node.js gRPC Implementation (Behavioral Reference)</item>
+        <item rank="3">Legacy ObjC/Java Wrappers (DO NOT USE)</item>
+      </api-priority>
+    </requirements>
+  </rule>
+
+  <rule id="architecture-threading">
+    <description>Strict 3-Layer Threading Architecture</description>
+    <principles>
+      <item>
+        <name>UI Thread (JS)</name>
+        <constraint>NEVER block this thread.</constraint>
+        <constraint>Only allowed to enqueue tasks to the worker thread.</constraint>
+        <constraint>Fastest possible return time.</constraint>
+      </item>
+      <item>
+        <name>Worker Thread (CompletionQueue)</name>
+        <constraint>Single background thread managing the gRPC event loop.</constraint>
+        <constraint>Polls `CompletionQueue::Next()` strictly.</constraint>
+        <constraint>Dispatches events back to JS via `CallInvoker`.</constraint>
+      </item>
+      <item>
+        <name>gRPC Internal Threads</name>
+        <constraint>Managed by grpc_core. Do not interfere.</constraint>
+      </item>
+    </principles>
+  </rule>
+
+  <rule id="architecture-memory">
+    <description>Zero-Leak RAII Memory Model</description>
+    <principles>
+      <item>
+        <name>Ownership</name>
+        <constraint>All heap allocations MUST use `std::shared_ptr` or `std::unique_ptr`.</constraint>
+        <constraint>Raw `new`/`delete` is STRICTLY FORBIDDEN.</constraint>
+      </item>
+      <item>
+        <name>Data Transfer</name>
+        <constraint>Prefer `grpc::Slice` for zero-copy buffer transfers where possible.</constraint>
+        <constraint>Use `std::vector<uint8_t>` for binary data ownership.</constraint>
+      </item>
+    </principles>
+  </rule>
+
+  <rule id="code-philosophy">
+    <principles>
+      <item>Minimize code volume - less code is better.</item>
+      <item>No premature abstraction - build exactly what is needed.</item>
+      <item>Self-documenting code over comments.</item>
+      <item>Modularize by feature (client, stream, call), not technical layer.</item>
+    </principles>
+  </rule>
+</rules>

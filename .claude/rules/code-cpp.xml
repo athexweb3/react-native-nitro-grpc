@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rules>
+  <rule id="cpp-standards">
+    <constraints>
+      <constraint>Use **C++20** standard features (concepts, ranges, std::span).</constraint>
+      <constraint>Use `std::shared_ptr` for shared ownership (e.g., Channels).</constraint>
+      <constraint>Use `std::unique_ptr` for exclusive ownership (e.g., Calls).</constraint>
+      <constraint>Use `std::weak_ptr` to prevent cyclic references in callbacks.</constraint>
+      <constraint>NO usage of deprecated OpenSSL/gRPC APIs.</constraint>
+    </constraints>
+    
+    <patterns>
+      <pattern name="HybridObject">
+        <description>Integration with Nitro Modules</description>
+        <do>Inherit strictly from the generated `Hybrid*Spec` class.</do>
+        <do>Keep state minimal in the HybridObject wrapper.</do>
+        <dont>Do not expose raw C++ pointers to JS.</dont>
+      </pattern>
+      
+      <pattern name="Threading">
+        <description>Safe Concurrency</description>
+        <do>Use `std::mutex` and `std::lock_guard` for shared state protection.</do>
+        <do>Use `RunOnBackgroundThread()` helpers for expensive operations.</do>
+        <dont>Do not call blocking gRPC methods from the main thread.</dont>
+      </pattern>
+
+      <pattern name="JSI-Interop">
+        <description>JavaScript Interface</description>
+        <do>Use `jsi::ArrayBuffer` for binary data.</do>
+        <do>Catch all C++ exceptions and convert them to `jsi::JSError`.</do>
+        <dont>Do not leak `std::exception` across the boundary (crashes app).</dont>
+      </pattern>
+    </patterns>
+  </rule>
+</rules>

@@ -1,0 +1,17 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement
+title: "🚀 "
+labels: [✨ feature]
+body:
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: What is the feature you want?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Use Case
+      description: Why do you need this feature?
+    validations:
+      required: true

@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 1.0.0, patch, minor)'
+        required: true
+        default: 'patch'
+      dry-run:
+        description: 'Dry run (no actual publish)'
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.0
+
+      - name: Setup Node.js (for npm publish authentication)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Ruby is needed for Pods in 'bun bootstrap' (which runs 'bun pods')
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+          working-directory: example
+
+      - name: Install dependencies
+        run: bun bootstrap
+
+      - name: Generate Nitro Bindings
+        run: bun nitro-codegen
+
+      - name: Copy README to package
+        run: cp README.md packages/react-native-grpc/README.md
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Release to NPM
+        working-directory: packages/react-native-grpc
+        run: |
+          if [ "${{ inputs.dry-run }}" = "true" ]; then
+            bun release ${{ inputs.inputs.version }} --dry-run --ci
+          else
+            bun release ${{ inputs.inputs.version }} --ci
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Create GitHub Release
+        run: |
+          if [ "${{ inputs.dry-run }}" = "true" ]; then
+            bun run release-it ${{ inputs.inputs.version }} --dry-run --ci
+          else
+            bun run release-it ${{ inputs.inputs.version }} --ci
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

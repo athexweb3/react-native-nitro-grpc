@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rules>
+  <rule id="grpc-best-practices">
+    <security>
+      <item>Secure Default: Always default to TLS/SSL (use system root certs).</item>
+      <item>Verify peer certificates by default.</item>
+      <item>Reject insecure connections unless explicitly configured (`insecure: true`).</item>
+    </security>
+
+    <performance>
+      <item>Reuse Channels: Create one channel per host and reuse it.</item>
+      <item>Keep-Alive: Configure aggressive keep-alive for mobile networks.</item>
+      <item>Compression: Enable gzip compression by default for payloads > 1KB.</item>
+      <item>Tagging: Use unique tags for every async operation in the CompletionQueue.</item>
+    </performance>
+
+    <correctness>
+      <item>Status Codes: Map C++ `grpc::Status` codes 1:1 to JS errors.</item>
+      <item>Cancellation: Support full client-side cancellation (propagates to server).</item>
+      <item>Deadlines: Always allow setting a deadline/timeout for calls.</item>
+      <item>Metadata: Support ASCII and Binary (-bin) headers correctly.</item>
+    </correctness>
+    
+    <mobile-concerns>
+      <item>Network Change: Handle switching from Wifi to 4G gracefully.</item>
+      <item>Background: Close idle connections when app is backgrounded to save battery.</item>
+    </mobile-concerns>
+  </rule>
+</rules>

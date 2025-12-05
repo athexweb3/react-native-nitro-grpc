@@ -1,0 +1,45 @@
+name: CI (JS)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'packages/react-native-grpc/src/**'
+      - 'packages/react-native-grpc/*.json'
+      - 'example/src/**'
+      - 'bun.lock'
+      - '.github/workflows/ci-js.yml'
+  pull_request:
+    paths:
+      - 'packages/react-native-grpc/src/**'
+      - 'packages/react-native-grpc/*.json'
+      - 'example/src/**'
+      - 'bun.lock'
+      - '.github/workflows/ci-js.yml'
+
+jobs:
+  validate_js:
+    name: Validate JS (TSC & Lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.0
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Generate Nitro Bindings
+        run: bun nitro-codegen
+
+      - name: Type Check (TSC)
+        run: bun tsc
+
+      - name: Lint & Format Check
+        run: |
+          bun lint
+          bun format
+          # Verify no changes needed
+          git diff --exit-code

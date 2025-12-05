@@ -1,0 +1,103 @@
+{
+    "version": "0.0.0",
+    "type": "module",
+    "workspaces": [
+        "packages/react-native-grpc",
+        "example"
+    ],
+    "description": "High-performance gRPC for React Native powered by C++ and Nitro Modules.",
+    "scripts": {
+        "bootstrap": "bun install && bun pods",
+        "clean": "bun --filter='*' clean",
+        "clean:deep": "bun --filter='*' clean:deep && del-cli node_modules",
+        "pods": "bun --filter='react-native-grpc-example' pods",
+        "start": "bun --cwd example start",
+        "tsc": "bun --filter='*' typescript",
+        "lint": "bun --filter='*' lint",
+        "lint:fix": "bun --filter='*' lint:fix",
+        "format": "bun --filter='*' format",
+        "format:fix": "bun --filter='*' format:fix",
+        "test": "bun --filter='*' test",
+        "release": "release-it",
+        "prepare": "husky && bun --filter='react-native-grpc' prepare"
+    },
+    "packageManager": "bun@1.2.0",
+    "devDependencies": {
+        "@eslint/compat": "^1.0.0",
+        "@eslint/js": "^9.0.0",
+        "@release-it/bumper": "^7.0.0",
+        "@release-it/conventional-changelog": "^8.0.0",
+        "@types/node": "^20.0.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "del-cli": "^5.1.0",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.1.3",
+        "eslint-plugin-react-native": "^4.1.0",
+        "husky": "^9.0.11",
+        "lint-staged": "^15.2.2",
+        "nitro-codegen": "^0.29.4",
+        "prettier": "^3.2.5",
+        "release-it": "^17.1.1",
+        "typescript": "^5.4.2",
+        "typescript-eslint": "^7.0.0"
+    },
+    "release-it": {
+        "npm": {
+            "publish": false
+        },
+        "git": {
+            "commitMessage": "chore: release ${version}",
+            "tagName": "v${version}",
+            "requireCleanWorkingDir": false
+        },
+        "github": {
+            "release": true
+        },
+        "hooks": {
+            "before:release": "bun bundle-install && bun pods && git add example/ios/Podfile.lock"
+        },
+        "plugins": {
+            "@release-it/conventional-changelog": {
+                "preset": {
+                    "name": "conventionalcommits",
+                    "types": [
+                        {
+                            "type": "feat",
+                            "section": "✨ Features"
+                        },
+                        {
+                            "type": "perf",
+                            "section": "💨 Performance Improvements"
+                        },
+                        {
+                            "type": "fix",
+                            "section": "🐛 Bug Fixes"
+                        },
+                        {
+                            "type": "chore(deps)",
+                            "section": "🛠️ Dependency Upgrades"
+                        },
+                        {
+                            "type": "docs",
+                            "section": "📚 Documentation"
+                        }
+                    ]
+                }
+            },
+            "lint-staged": {
+                "*.{js,ts,tsx}": [
+                    "bun lint:fix",
+                    "bun format:fix"
+                ]
+            }
+        }
+    },
+    "lint-staged": {
+        "*.{js,ts,tsx}": [
+            "bun lint:fix",
+            "bun format:fix"
+        ]
+    }
+}
