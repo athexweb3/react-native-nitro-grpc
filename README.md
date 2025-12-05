@@ -87,3 +87,8 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 ## License
 
 MIT
+
+## Contributors
+
+- [Orven Web3](https://github.com/orvenweb3)
+- [Athex Web3](https://github.com/athexweb3)
