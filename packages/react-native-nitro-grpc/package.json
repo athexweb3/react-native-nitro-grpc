@@ -1,5 +1,5 @@
 {
-    "name": "react-native-grpc",
+    "name": "react-native-nitro-grpc",
     "version": "0.0.0",
     "description": "A high-performance gRPC library for React Native using Nitro Modules",
     "main": "./lib/module/index.js",
