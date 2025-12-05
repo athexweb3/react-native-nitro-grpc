@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-grpc';
+import { multiply } from 'react-native-nitro-grpc';
 
 const result = multiply(3, 7);
 

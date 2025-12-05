@@ -1,5 +1,5 @@
 {
-  "name": "react-native-grpc-example",
+  "name": "react-native-nitro-grpc-example",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "react": "19.1.0",
     "react-native": "0.81.1",
     "react-native-nitro-modules": "^0.29.4",
-    "react-native-grpc": "workspace:*"
+    "react-native-nitro-grpc": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

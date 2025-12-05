@@ -2,7 +2,7 @@
     "version": "0.0.0",
     "type": "module",
     "workspaces": [
-        "packages/react-native-grpc",
+        "packages/react-native-nitro-grpc",
         "example"
     ],
     "description": "High-performance gRPC for React Native powered by C++ and Nitro Modules.",
@@ -10,7 +10,7 @@
         "bootstrap": "bun install && bun pods",
         "clean": "bun --filter='*' clean",
         "clean:deep": "bun --filter='*' clean:deep && del-cli node_modules",
-        "pods": "bun --filter='react-native-grpc-example' pods",
+        "pods": "bun --filter='react-native-nitro-grpc-example' pods",
         "start": "bun --cwd example start",
         "tsc": "bun --filter='*' typescript",
         "lint": "bun --filter='*' lint",
@@ -19,7 +19,7 @@
         "format:fix": "bun --filter='*' format:fix",
         "test": "bun --filter='*' test",
         "release": "release-it",
-        "prepare": "husky && bun --filter='react-native-grpc' prepare"
+        "prepare": "husky && bun --filter='react-native-nitro-grpc' prepare"
     },
     "packageManager": "bun@1.2.0",
     "devDependencies": {

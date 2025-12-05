@@ -1,12 +1,12 @@
-# react-native-grpc
+# react-native-nitro-grpc
 > **High-performance gRPC for React Native powered by C++ and Nitro Modules.**
 
-[![npm version](https://img.shields.io/npm/v/react-native-grpc)](https://www.npmjs.com/package/react-native-grpc)
-[![License](https://img.shields.io/github/license/athexweb3/react-native-grpc)](https://github.com/athexweb3/react-native-grpc/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/react-native-nitro-grpc)](https://www.npmjs.com/package/react-native-nitro-grpc)
+[![License](https://img.shields.io/github/license/athexweb3/react-native-nitro-grpc)](https://github.com/athexweb3/react-native-nitro-grpc/blob/main/LICENSE)
 
-`react-native-grpc` brings **Native C++ gRPC** to React Native, offering superior performance, type safety, and true bi-directional streaming compared to REST or `grpc-web`.
+`react-native-nitro-grpc` brings **Native C++ gRPC** to React Native, offering superior performance, type safety, and true bi-directional streaming compared to REST or `grpc-web`.
 
-## Why `react-native-grpc`?
+## Why `react-native-nitro-grpc`?
 
 *   **🚀 Unmatched Performance**: Uses **Protobuf** (30-50% smaller than JSON) and **Zero-Copy Parsing** in C++ to keep your JS thread free.
 *   **⚡ HTTP/2 & Multiplexing**: One TCP connection for all requests with header compression (HPACK).
@@ -16,7 +16,7 @@
 ## Installation
 
 ```bash
-bun install react-native-grpc
+bun install react-native-nitro-grpc
 cd ios && bun pods
 ```
 
@@ -53,7 +53,7 @@ bun nitro-grpc codegen
 
 ```typescript
 import { AuthService } from './generated/service';
-import { GrpcClient } from 'react-native-grpc';
+import { GrpcClient } from 'react-native-nitro-grpc';
 
 const grpcClient = new GrpcClient('your-api.com:443');
 const client = new AuthService(grpcClient);
@@ -73,7 +73,7 @@ async function performLogin() {
 
 ## Comparison
 
-| Feature | REST | GraphQL | gRPC (`react-native-grpc`) |
+| Feature | REST | GraphQL | gRPC (`react-native-nitro-grpc`) |
 | :--- | :--- | :--- | :--- |
 | **Format** | JSON (Text) | JSON (Text) | **Protobuf (Binary)** |
 | **Transport** | HTTP/1.1 or 2 | HTTP/1.1 or 2 | **HTTP/2 (Mandatory)** |
