@@ -31,8 +31,8 @@ on:
       - 'example/bun.lock'
 
 jobs:
-  compile_js:
-    name: Compile JS (tsc)
+  typecheck:
+    name: Typecheck JS (tsc)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
