@@ -32,7 +32,9 @@ export type {
 export type { Metadata, MetadataValue } from './types/GrpcMetadata';
 
 // Utility functions
-export * from './utils';
+export * from './utils/base64Utils';
+export * from './utils/sha256Utils';
+export * from './stream/StreamImplementations';
 
 /**
  * Main entry point for react-native-nitro-grpc.
