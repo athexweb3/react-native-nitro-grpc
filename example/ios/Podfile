@@ -16,8 +16,16 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+
+# Import the gRPC fix script from the package
+pkg_path = File.join(File.dirname(`node --print "require.resolve('react-native-nitro-grpc/package.json')"`), "scripts/fix-grpc.rb")
+require pkg_path if File.exist?(pkg_path)
+
 target 'GrpcExample' do
   config = use_native_modules!
+
+  # Install gRPC dependencies with correct configuration
+  RNGrpc.install_dependencies(self) if defined?(RNGrpc)
 
   use_react_native!(
     :path => config[:reactNativePath],
@@ -26,6 +34,9 @@ target 'GrpcExample' do
   )
 
   post_install do |installer|
+    # Apply the gRPC fix from the package
+    RNGrpc.post_install(installer) if defined?(RNGrpc)
+
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,

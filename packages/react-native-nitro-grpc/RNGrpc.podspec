@@ -10,9 +10,9 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => min_ios_version_supported }
+  s.platforms    = { :ios => "13.0", :visionos => "1.0" }
   s.source       = { :git => "https://github.com/athexweb3/react-native-nitro-grpc.git", :tag => "#{s.version}" }
-
+  
   s.source_files = [
     "ios/**/*.{swift}",
     "ios/**/*.{m,mm}",
@@ -21,12 +21,16 @@ Pod::Spec.new do |s|
 
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
-  s.dependency 'gRPC-C++', '~> 1.76'
-  s.dependency 'gRPC-Core', '~> 1.76'
+  s.dependency 'NitroModules'
+  s.dependency 'gRPC-C++'
+  s.dependency 'gRPC-Core'
 
   s.pod_target_xcconfig = {
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++20',
-    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) GPB_USE_PROTOBUF_FRAMEWORK_IMPORTS=1'
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) GPB_USE_PROTOBUF_FRAMEWORK_IMPORTS=1',
+    'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
+    'DEFINES_MODULE' => 'YES',
+    'SWIFT_COMPILATION_MODE' => 'wholemodule'
   }
 
   load 'nitrogen/generated/ios/RNGrpc+autolinking.rb'

@@ -1,6 +1,6 @@
 #include "hybrid/HybridGrpcClient.hpp"
 #include "hybrid/HybridGrpcStream.hpp"
-#include <HybridObjectRegistry.hpp>
+#include "HybridObjectRegistry.hpp"
 
 namespace margelo::nitro::grpc {
 

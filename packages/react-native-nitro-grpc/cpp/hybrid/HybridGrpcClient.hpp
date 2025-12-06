@@ -14,7 +14,7 @@ using namespace margelo::nitro;
 
 class HybridGrpcClient : public HybridGrpcClientSpec {
  public:
-  HybridGrpcClient();
+  HybridGrpcClient() : HybridObject(TAG) {}
 
   void connect(const std::string& host, bool isInsecure) override;
 
@@ -22,7 +22,7 @@ class HybridGrpcClient : public HybridGrpcClientSpec {
                                                                    const std::shared_ptr<ArrayBuffer>& data) override;
 
  private:
-  std::shared_ptr<grpc::Channel> _channel;
+  std::shared_ptr<::grpc::Channel> _channel;
 };
 
 } // namespace margelo::nitro::grpc
