@@ -11,10 +11,10 @@ namespace margelo::nitro::grpc {
 using namespace margelo::nitro;
 
 class HybridGrpcStream : public HybridGrpcStreamSpec {
-public:
+ public:
   HybridGrpcStream() : HybridGrpcStreamSpec() {}
 
-  void write(const std::shared_ptr<ArrayBuffer> &data) override {
+  void write(const std::shared_ptr<ArrayBuffer>& data) override {
     // TODO: Implement write
   }
 
@@ -22,18 +22,15 @@ public:
     // TODO: Implement writesDone
   }
 
-  void onData(
-      const std::function<void(const std::shared_ptr<ArrayBuffer> & /* data */)>
-          &callback) override {
+  void onData(const std::function<void(const std::shared_ptr<ArrayBuffer>& /* data */)>& callback) override {
     // TODO: Store callback
   }
 
-  void onEnd(const std::function<void()> &callback) override {
+  void onEnd(const std::function<void()>& callback) override {
     // TODO: Store callback
   }
 
-  void onError(const std::function<void(const std::string & /* error */)>
-                   &callback) override {
+  void onError(const std::function<void(const std::string& /* error */)>& callback) override {
     // TODO: Store callback
   }
 };

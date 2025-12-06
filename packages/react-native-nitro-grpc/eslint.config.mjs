@@ -1,29 +1,51 @@
-import { fixupConfigRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
-import prettier from 'eslint-plugin-prettier';
-import { defineConfig } from 'eslint/config';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import typescriptEslint from 'typescript-eslint';
+import eslintPluginPrettier from 'eslint-plugin-prettier';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import globals from 'globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-export default defineConfig([
+export default [
+  js.configs.recommended,
+  ...typescriptEslint.configs.recommended,
   {
-    extends: fixupConfigRules(compat.extends('@react-native', 'prettier')),
-    plugins: { prettier },
+    plugins: {
+      prettier: eslintPluginPrettier,
+    },
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
     rules: {
-      'react/react-in-jsx-scope': 'off',
       'prettier/prettier': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
+  eslintConfigPrettier,
   {
-    ignores: ['node_modules/', 'lib/'],
+    files: ['**/*.js', '**/*.config.js'],
+    rules: {
+      '@typescript-eslint/no-var-requires': 'off',
+      'no-undef': 'off',
+    }
   },
-]);
+  {
+    ignores: [
+      '**/node_modules/**',
+      'lib/**',
+      'android/**',
+      'ios/**',
+      'cpp/**',
+      'nitrogen/**',
+    ],
+  },
+];

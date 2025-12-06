@@ -1,12 +1,10 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-nitro-grpc';
-
-const result = multiply(3, 7);
+import { GrpcClient } from 'react-native-nitro-grpc';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>gRPC Client: {typeof GrpcClient}</Text>
     </View>
   );
 }
