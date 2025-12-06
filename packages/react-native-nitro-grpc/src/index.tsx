@@ -29,7 +29,7 @@ export type {
 } from './types/StreamTypes';
 
 // For backward compatibility (legacy API)
-export type { Metadata, MetadataValue } from './types/Metadata';
+export type { Metadata, MetadataValue } from './types/GrpcMetadata';
 
 // Utility functions
 export * from './utils';
