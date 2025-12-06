@@ -26,8 +26,13 @@ export type Metadata = Record<string, MetadataValue>;
 export class GrpcMetadata {
   private _map: Map<string, Array<string | Uint8Array>>;
 
-  constructor() {
+  constructor(init?: Record<string, MetadataValue>) {
     this._map = new Map();
+    if (init) {
+      Object.entries(init).forEach(([key, value]) => {
+        this.add(key, value);
+      });
+    }
   }
 
   /**
