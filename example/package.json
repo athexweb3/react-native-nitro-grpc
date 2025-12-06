@@ -8,7 +8,12 @@
     "start": "react-native start",
     "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
     "build:ios": "react-native build-ios --mode Debug",
-    "pods": "cd ios && pod install"
+    "pods": "cd ios && pod install",
+    "typescript": "tsc",
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint:fix": "eslint \"**/*.{js,ts,tsx}\" --fix",
+    "format": "prettier --check \"**/*.{js,ts,tsx}\"",
+    "format:fix": "prettier --write \"**/*.{js,ts,tsx}\""
   },
   "dependencies": {
     "react": "19.1.0",
@@ -26,7 +31,9 @@
     "@react-native/babel-preset": "0.81.1",
     "@react-native/metro-config": "0.81.1",
     "@react-native/typescript-config": "0.82.1",
+    "@types/jest": "^30.0.0",
     "@types/react": "^19.1.0",
+    "globals": "^16.5.0",
     "react-native-builder-bob": "^0.40.16",
     "react-native-monorepo-config": "^0.1.9"
   },

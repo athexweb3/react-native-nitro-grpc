@@ -1,0 +1,46 @@
+name: 'Validate C++'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/validate-cpp.yml'
+      - 'packages/react-native-nitro-grpc/android/src/main/cpp/**'
+      - 'packages/react-native-nitro-grpc/cpp/**'
+      - 'packages/react-native-nitro-grpc/nitrogen/generated/shared/**'
+  pull_request:
+    paths:
+      - '.github/workflows/validate-cpp.yml'
+      - 'packages/react-native-nitro-grpc/android/src/main/cpp/**'
+      - 'packages/react-native-nitro-grpc/cpp/**'
+      - 'packages/react-native-nitro-grpc/nitrogen/generated/shared/**'
+
+jobs:
+  validate_cpp:
+    name: C++ Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up clang-format
+        run: sudo apt-get install -y clang-format
+      - name: Run clang-format check
+        run: |
+          find packages/react-native-nitro-grpc/cpp packages/react-native-nitro-grpc/android/src/main/cpp \
+          -regex '.*\.\(cpp\|hpp\|cc\|cxx\|h\)' \
+          -exec clang-format --style=file --dry-run --Werror {} +
+      - uses: reviewdog/action-cpplint@master
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          flags: --linelength=140
+          targets: --recursive packages/react-native-nitro-grpc/cpp packages/react-native-nitro-grpc/android/src/main/cpp
+          filter: "-legal/copyright\
+            ,-readability/todo\
+            ,-build/namespaces\
+            ,-whitespace/comments\
+            ,-build/include_order\
+            ,-whitespace/indent_namespace\
+            ,-whitespace/parens\
+            ,-build/include_what_you_use\
+            "
