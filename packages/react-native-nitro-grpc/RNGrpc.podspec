@@ -24,6 +24,7 @@ Pod::Spec.new do |s|
   s.dependency 'NitroModules'
   s.dependency 'gRPC-C++'
   s.dependency 'gRPC-Core'
+  s.dependency 'nlohmann_json'
 
   s.pod_target_xcconfig = {
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++20',
