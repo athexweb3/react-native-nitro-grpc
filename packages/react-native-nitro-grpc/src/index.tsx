@@ -34,6 +34,7 @@ export type { Metadata, MetadataValue } from './types/GrpcMetadata';
 // Utility functions
 export * from './utils/base64Utils';
 export * from './utils/sha256Utils';
+export * from './utils/gzipUtils';
 export * from './stream/StreamImplementations';
 
 /**

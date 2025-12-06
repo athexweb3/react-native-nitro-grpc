@@ -18,6 +18,8 @@ add_library(${PACKAGE_NAME} SHARED
   ../../cpp/src/utils/json/JsonParser.cpp
   ../../cpp/src/utils/error/ErrorHandler.cpp
   ../../cpp/src/hybrid/base64/HybridBase64.cpp
+  ../../cpp/src/hybrid/sha256/HybridSha256.cpp
+  ../../cpp/src/hybrid/gzip/HybridGzip.cpp
 )
 
 # Add Nitrogen specs :)
