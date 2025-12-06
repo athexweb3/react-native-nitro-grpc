@@ -1,10 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
-export function HomeScreen() {
-    const navigation = useNavigation<any>();
-
+export function HomeScreen({ navigation }: { navigation: { navigate: (screen: string) => void } }) {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Nitro gRPC Example</Text>

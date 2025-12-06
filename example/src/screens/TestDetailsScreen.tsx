@@ -1,16 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../styles/colors';
 import type { TestResult } from '../types/Results';
 
-type RootStackParamList = {
-    TestDetails: { results: TestResult[]; suiteName: string };
-};
-
-type Props = NativeStackScreenProps<RootStackParamList, 'TestDetails'>;
-
-export function TestDetailsScreen({ route }: any) {
+export function TestDetailsScreen({ route }: { route: { params: { results: TestResult[]; suiteName: string } } }) {
     const { results, suiteName } = route.params;
 
     return (
