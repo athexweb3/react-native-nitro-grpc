@@ -1,22 +1,22 @@
 import { GrpcMetadata } from '../types/GrpcMetadata';
+import { isUint8Array, uint8ArrayToString } from './base64Utils';
 
 /**
- * Creates metadata from a plain object.
- * Convenience helper for quickly creating metadata.
+ * Creates a new GrpcMetadata instance from a plain object.
  *
- * @param obj - Plain object with string keys and string/Buffer values
- * @returns GrpcMetadata instance
+ * @param obj - Plain object with string keys and string/Uint8Array values
+ * @returns New GrpcMetadata instance
  *
  * @example
  * ```typescript
  * const metadata = createMetadata({
- *   'authorization': 'Bearer token123',
- *   'x-trace-id': 'abc-123'
+ *   'authorization': 'Bearer token',
+ *   'custom-bin': new Uint8Array([1, 2, 3])
  * });
  * ```
  */
 export function createMetadata(
-  obj: Record<string, string | Buffer>
+  obj: Record<string, string | Uint8Array>
 ): GrpcMetadata {
   const metadata = new GrpcMetadata();
   Object.entries(obj).forEach(([key, value]) => {
@@ -93,8 +93,8 @@ export function filterMetadataByPrefix(
  */
 export function metadataToObject(
   metadata: GrpcMetadata
-): Record<string, string | Buffer> {
-  const result: Record<string, string | Buffer> = {};
+): Record<string, string | Uint8Array> {
+  const result: Record<string, string | Uint8Array> = {};
 
   metadata.getKeys().forEach((key) => {
     const value = metadata.get(key);
@@ -118,7 +118,7 @@ export function hasMetadataKey(metadata: GrpcMetadata, key: string): boolean {
 }
 
 /**
- * Gets a metadata value as a string, handling Buffer conversion.
+ * Gets a metadata value as a string, handling Uint8Array conversion.
  *
  * @param metadata - GrpcMetadata instance
  * @param key - Metadata key
@@ -130,5 +130,5 @@ export function getMetadataAsString(
 ): string | undefined {
   const value = metadata.get(key);
   if (value === undefined) return undefined;
-  return Buffer.isBuffer(value) ? value.toString('utf-8') : value;
+  return isUint8Array(value) ? uint8ArrayToString(value) : value;
 }

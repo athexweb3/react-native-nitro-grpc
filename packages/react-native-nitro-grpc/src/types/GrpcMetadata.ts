@@ -1,3 +1,12 @@
+import { encodeBase64, decodeBase64, isUint8Array } from '../utils/base64Utils';
+
+/**
+ * Simple type definitions for metadata values.
+ * For backward compatibility with legacy API.
+ */
+export type MetadataValue = string | Uint8Array;
+export type Metadata = Record<string, MetadataValue>;
+
 /**
  * Metadata handler for gRPC calls.
  * Metadata is sent as HTTP/2 headers and can contain authentication tokens,
@@ -11,11 +20,11 @@
  * const metadata = new GrpcMetadata();
  * metadata.add('authorization', 'Bearer token123');
  * metadata.add('trace-id', 'abc-123');
- * metadata.add('custom-bin', Buffer.from([1, 2, 3]));
+ * metadata.add('custom-bin', new Uint8Array([1, 2, 3]));
  * ```
  */
 export class GrpcMetadata {
-  private _map: Map<string, Array<string | Buffer>>;
+  private _map: Map<string, Array<string | Uint8Array>>;
 
   constructor() {
     this._map = new Map();
@@ -26,9 +35,9 @@ export class GrpcMetadata {
    * If the key already exists, the value is appended to the list.
    *
    * @param key - Metadata key (case-insensitive)
-   * @param value - String or Buffer value
+   * @param value - String or Uint8Array value
    */
-  add(key: string, value: string | Buffer): void {
+  add(key: string, value: string | Uint8Array): void {
     const normalizedKey = key.toLowerCase();
     const existing = this._map.get(normalizedKey) || [];
     existing.push(value);
@@ -39,9 +48,9 @@ export class GrpcMetadata {
    * Sets a key-value pair, replacing any existing values for that key.
    *
    * @param key - Metadata key (case-insensitive)
-   * @param value - String or Buffer value
+   * @param value - String or Uint8Array value
    */
-  set(key: string, value: string | Buffer): void {
+  set(key: string, value: string | Uint8Array): void {
     const normalizedKey = key.toLowerCase();
     this._map.set(normalizedKey, [value]);
   }
@@ -52,7 +61,7 @@ export class GrpcMetadata {
    * @param key - Metadata key (case-insensitive)
    * @returns The first value, or undefined if key doesn't exist
    */
-  get(key: string): string | Buffer | undefined {
+  get(key: string): string | Uint8Array | undefined {
     const normalizedKey = key.toLowerCase();
     const values = this._map.get(normalizedKey);
     return values?.[0];
@@ -64,7 +73,7 @@ export class GrpcMetadata {
    * @param key - Metadata key (case-insensitive)
    * @returns Array of all values for the key
    */
-  getAll(key: string): Array<string | Buffer> {
+  getAll(key: string): Array<string | Uint8Array> {
     const normalizedKey = key.toLowerCase();
     return this._map.get(normalizedKey) || [];
   }
@@ -102,9 +111,7 @@ export class GrpcMetadata {
   toJSON(): Record<string, string[]> {
     const result: Record<string, string[]> = {};
     this._map.forEach((values, key) => {
-      result[key] = values.map((v) =>
-        Buffer.isBuffer(v) ? v.toString('base64') : v
-      );
+      result[key] = values.map((v) => (isUint8Array(v) ? encodeBase64(v) : v));
     });
     return result;
   }
@@ -122,7 +129,7 @@ export class GrpcMetadata {
       values.forEach((value) => {
         // Detect base64-encoded binary data (keys ending with '-bin')
         if (key.endsWith('-bin')) {
-          metadata.add(key, Buffer.from(value, 'base64'));
+          metadata.add(key, decodeBase64(value));
         } else {
           metadata.add(key, value);
         }
