@@ -6,7 +6,7 @@ bun lint-staged
 
 # Check C++ formatting
 # Check C++ formatting
-find packages/react-native-nitro-grpc/cpp -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror --style=file
+find packages/react-native-nitro-grpc/cpp packages/react-native-nitro-grpc/android/src/main/cpp -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror --style=file
 
 # Check Typescript
 bun tsc
