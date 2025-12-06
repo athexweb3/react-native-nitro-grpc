@@ -8,10 +8,10 @@
 
 ## Why `react-native-nitro-grpc`?
 
-*   **🚀 Unmatched Performance**: Uses **Protobuf** (30-50% smaller than JSON) and **Zero-Copy Parsing** in C++ to keep your JS thread free.
-*   **⚡ HTTP/2 & Multiplexing**: One TCP connection for all requests with header compression (HPACK).
-*   **🔄 True Bi-directional Streaming**: Real-time data flow for chat, trading, and voice apps without WebSockets.
-*   **🛡️ Type Safety**: strict TypeScript definitions generated directly from your `.proto` files.
+*   **Unmatched Performance**: Uses **Protobuf** (30-50% smaller than JSON) and **Zero-Copy Parsing** in C++ to keep your JS thread free.
+*   **HTTP/2 & Multiplexing**: One TCP connection for all requests with header compression (HPACK).
+*   **True Bi-directional Streaming**: Real-time data flow for chat, trading, and voice apps without WebSockets.
+*   **Type Safety**: strict TypeScript definitions generated directly from your `.proto` files.
 
 ## Installation
 
