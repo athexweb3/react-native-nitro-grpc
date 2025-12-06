@@ -1,12 +1,12 @@
 export type TestSuites = {
-    [key: string]: TestSuite;
+  [key: string]: TestSuite;
 };
 
 export interface TestSuite {
-    value: boolean;
-    tests: Tests;
+  value: boolean;
+  tests: Tests;
 }
 
 export interface Tests {
-    [key: string]: () => void | Promise<void>;
+  [key: string]: () => void | Promise<void>;
 }
