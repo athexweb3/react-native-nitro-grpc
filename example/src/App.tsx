@@ -1,18 +1,14 @@
-import { Text, View, StyleSheet } from 'react-native';
-import { GrpcClient } from 'react-native-nitro-grpc';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { RootStack } from './navigators/RootStack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>gRPC Client: {typeof GrpcClient}</Text>
-    </View>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <RootStack />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

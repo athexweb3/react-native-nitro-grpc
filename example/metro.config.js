@@ -1,16 +1,37 @@
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
-const { getDefaultConfig } = require('@react-native/metro-config');
-const { withMetroConfig } = require('react-native-monorepo-config');
 
-const pkgroot = path.resolve(__dirname, 'packages', 'react-native-nitro-grpc');
+const root = path.resolve(__dirname, '..');
+const packagesDir = path.join(root, 'packages');
 
 /**
  * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
+ * https://reactnative.dev/docs/metro
  *
- * @type {import('metro-config').MetroConfig}
+ * @type {import('@react-native/metro-config').MetroConfig}
  */
-module.exports = withMetroConfig(getDefaultConfig(__dirname), {
-  pkgroot,
-  dirname: __dirname,
-});
+const config = {
+  watchFolders: [root],
+
+  resolver: {
+    nodeModulesPaths: [
+      path.join(__dirname, 'node_modules'),
+      path.join(root, 'node_modules'),
+      packagesDir,
+    ],
+    extraNodeModules: {
+      stream: require.resolve('readable-stream'),
+    },
+  },
+
+  transformer: {
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: true,
+      },
+    }),
+  },
+};
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);
