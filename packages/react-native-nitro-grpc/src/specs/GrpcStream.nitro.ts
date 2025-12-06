@@ -23,14 +23,27 @@ export interface GrpcStream
   onData(callback: (data: ArrayBuffer) => void): void;
 
   /**
-   * Sets a callback to be called when the stream ends.
+   * Sets a callback to be called when metadata is received.
+   * @param callback The callback function receiving JSON-serialized metadata
+   */
+  onMetadata(callback: (metadataJson: string) => void): void;
+
+  /**
+   * Sets a callback to be called when the stream completes with a status.
    * @param callback The callback function
    */
-  onEnd(callback: () => void): void;
+  onStatus(
+    callback: (code: number, message: string, metadataJson: string) => void
+  ): void;
 
   /**
    * Sets a callback to be called when an error occurs.
    * @param callback The callback function
    */
   onError(callback: (error: string) => void): void;
+
+  /**
+   * Cancels the stream.
+   */
+  cancel(): void;
 }
