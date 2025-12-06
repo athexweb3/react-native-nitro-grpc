@@ -41,7 +41,7 @@ export abstract class GrpcStreamBase extends EventEmitter {
   on(event: 'error', listener: (error: GrpcError) => void): this;
 
   // Catch-all for EventEmitter compatibility
-  on(event: string, listener: (...args: any[]) => void): this {
+  on(event: string, listener: (...args: unknown[]) => void): this {
     return super.on(event, listener);
   }
 
@@ -102,8 +102,8 @@ export abstract class ServerStream<T> extends GrpcStreamBase {
   on(event: 'error', listener: (error: GrpcError) => void): this;
 
   // Catch-all for EventEmitter
-  on(event: string, listener: (...args: any[]) => void): this {
-    return super.on(event as any, listener);
+  on(event: string, listener: (...args: unknown[]) => void): this {
+    return super.on(event as unknown, listener);
   }
 }
 
@@ -182,8 +182,8 @@ export abstract class BidiStream<Req, Res> extends GrpcStreamBase {
   on(event: 'error', listener: (error: GrpcError) => void): this;
 
   // Catch-all for EventEmitter
-  on(event: string, listener: (...args: any[]) => void): this {
-    return super.on(event as any, listener);
+  on(event: string, listener: (...args: unknown[]) => void): this {
+    return super.on(event as unknown, listener);
   }
   /**
    * Writes a request message to the server.

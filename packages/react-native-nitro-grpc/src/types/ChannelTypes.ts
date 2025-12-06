@@ -229,11 +229,11 @@ export interface ChannelOptions {
    * Override the channel implementation.
    * Advanced: Custom channel class constructor.
    */
-  'channelOverride'?: any;
+  'channelOverride'?: unknown;
 
   /**
    * Override the channel factory.
    * Advanced: Custom channel factory function.
    */
-  'channelFactoryOverride'?: any;
+  'channelFactoryOverride'?: unknown;
 }
