@@ -1,4 +1,11 @@
 /**
+ * Simple type definitions for metadata values.
+ * For backward compatibility with legacy API.
+ */
+export type MetadataValue = string | Buffer;
+export type Metadata = Record<string, MetadataValue>;
+
+/**
  * Metadata handler for gRPC calls.
  * Metadata is sent as HTTP/2 headers and can contain authentication tokens,
  * tracing information, or any custom key-value pairs.
