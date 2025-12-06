@@ -20,6 +20,7 @@ add_library(${PACKAGE_NAME} SHARED
   ../../cpp/src/hybrid/base64/HybridBase64.cpp
   ../../cpp/src/hybrid/sha256/HybridSha256.cpp
   ../../cpp/src/hybrid/gzip/HybridGzip.cpp
+  ../../cpp/src/hybrid/uuid/HybridUuid.cpp
 )
 
 # Add Nitrogen specs :)

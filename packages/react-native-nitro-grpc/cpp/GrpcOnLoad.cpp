@@ -4,6 +4,7 @@
 #include "src/hybrid/base64/HybridBase64.hpp"
 #include "src/hybrid/gzip/HybridGzip.hpp"
 #include "src/hybrid/sha256/HybridSha256.hpp"
+#include "src/hybrid/uuid/HybridUuid.hpp"
 
 namespace margelo::nitro::grpc {
 
@@ -18,6 +19,8 @@ void registerHybridObjects() {
                                                         []() -> std::shared_ptr<HybridObject> { return std::make_shared<HybridSha256>(); });
   HybridObjectRegistry::registerHybridObjectConstructor("Gzip",
                                                         []() -> std::shared_ptr<HybridObject> { return std::make_shared<HybridGzip>(); });
+  HybridObjectRegistry::registerHybridObjectConstructor("Uuid",
+                                                        []() -> std::shared_ptr<HybridObject> { return std::make_shared<HybridUuid>(); });
 }
 
 } // namespace margelo::nitro::grpc
