@@ -13,9 +13,11 @@ add_library(${PACKAGE_NAME} SHARED
   ../../cpp/src/core/channel/ChannelManager.cpp
   ../../cpp/src/core/metadata/MetadataConverter.cpp
   ../../cpp/src/calls/UnaryCall.cpp
-  ../../cpp/src/bridge/HybridGrpcClient.cpp
+  ../../cpp/src/calls/UnaryCall.cpp
+  ../../cpp/src/hybrid/HybridGrpcClient.cpp
   ../../cpp/src/utils/json/JsonParser.cpp
   ../../cpp/src/utils/error/ErrorHandler.cpp
+  ../../cpp/src/hybrid/base64/HybridBase64.cpp
 )
 
 # Add Nitrogen specs :)
@@ -27,7 +29,7 @@ include_directories(
   "../cpp"
   "../cpp/src"
   "../cpp/src/core"
-  "../cpp/src/bridge"
+  "../cpp/src/hybrid"
   "../cpp/src/calls"
   "../cpp/src/utils"
   "../cpp/src/utils/json"
