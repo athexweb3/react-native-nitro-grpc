@@ -30,6 +30,7 @@ include_directories(
   "../cpp/src/bridge"
   "../cpp/src/calls"
   "../cpp/src/utils"
+  "../cpp/src/utils/json"
 )
 
 find_package(grpc REQUIRED CONFIG)

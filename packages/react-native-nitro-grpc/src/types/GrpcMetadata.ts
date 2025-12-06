@@ -171,4 +171,19 @@ export class GrpcMetadata {
   get size(): number {
     return this._map.size;
   }
+
+  /**
+   * Gets a simplified map representation for logging/debugging.
+   * Multiple values are joined by comma.
+   * Binary values are base64 encoded.
+   */
+  getMap(): Record<string, string> {
+    const result: Record<string, string> = {};
+    this._map.forEach((values, key) => {
+      result[key] = values
+        .map((v) => (isUint8Array(v) ? encodeBase64(v) : v))
+        .join(', ');
+    });
+    return result;
+  }
 }

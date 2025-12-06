@@ -4,8 +4,15 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { TestSuitesScreen } from '../screens/TestSuitesScreen';
 
 import { TestDetailsScreen } from '../screens/TestDetailsScreen';
+import { TestResult } from '../types/Results';
 
-const Stack = createNativeStackNavigator();
+type RootStackParamList = {
+  Home: undefined;
+  TestSuites: undefined;
+  TestDetailsScreen: { results: TestResult[]; suiteName: string };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootStack() {
   return (

@@ -56,10 +56,11 @@ export class GrpcChannel {
    * @param tryToConnect - If true, attempt to connect if idle
    * @returns Current channel state
    */
-  getState(_tryToConnect: boolean = false): ChannelState {
-    // TODO: Implement in C++
-    // For now, return READY as placeholder
-    return 2 as ChannelState; // ChannelState.READY
+  getState(tryToConnect: boolean = false): ChannelState {
+    if (this._closed) {
+      return 4; // SHUTDOWN
+    }
+    return this._hybrid.getConnectivityState(tryToConnect) as ChannelState;
   }
 
   /**
@@ -70,13 +71,22 @@ export class GrpcChannel {
    * @param callback - Called when state changes or deadline is reached
    */
   watchConnectivityState(
-    _currentState: ChannelState,
-    _deadline: Date,
+    currentState: ChannelState,
+    deadline: Date,
     callback: (error?: Error) => void
   ): void {
-    // TODO: Implement in C++
-    // For now, just call callback immediately
-    setTimeout(() => callback(), 0);
+    if (this._closed) {
+      callback(new Error('Channel is closed'));
+      return;
+    }
+
+    const deadlineMs = deadline.getTime();
+    this._hybrid
+      .watchConnectivityState(currentState, deadlineMs)
+      .then(() => callback())
+      .catch((error) =>
+        callback(error instanceof Error ? error : new Error(String(error)))
+      );
   }
 
   /**
