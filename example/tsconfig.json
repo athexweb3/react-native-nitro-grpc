@@ -1,0 +1,15 @@
+{
+    "extends": "@react-native/typescript-config/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "react-native-nitro-grpc": [
+                "../packages/react-native-nitro-grpc/src/index"
+            ]
+        }
+    },
+    "include": [
+        ".",
+        "../packages/react-native-nitro-grpc/src"
+    ]
+}

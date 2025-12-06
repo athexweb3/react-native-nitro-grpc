@@ -5,10 +5,11 @@ export PATH="$HOME/.bun/bin:$PATH"
 bun lint-staged
 
 # Check C++ formatting
-find packages/react-native-grpc/cpp -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror --style=file
+# Check C++ formatting
+find packages/react-native-nitro-grpc/cpp -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror --style=file
 
 # Check Typescript
 bun tsc
 
 # Run prepare script
-bun --filter="react-native-grpc" prepare
+bun --filter="react-native-nitro-grpc" prepare
