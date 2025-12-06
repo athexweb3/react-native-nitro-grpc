@@ -106,7 +106,7 @@ describe('StreamImplementations', () => {
         let stream: ServerStreamImpl<string>;
 
         beforeEach(() => {
-            stream = new ServerStreamImpl(mockHybrid, mockClient);
+            stream = new ServerStreamImpl(mockHybrid, mockClient as any);
         });
 
         it('emits data events', () => {
@@ -172,7 +172,7 @@ describe('StreamImplementations', () => {
         let stream: ClientStreamImpl<string, string>;
 
         beforeEach(() => {
-            stream = new ClientStreamImpl(mockHybrid, mockClient);
+            stream = new ClientStreamImpl(mockHybrid, mockClient as any);
         });
 
         it('writes data to hybrid stream', () => {
@@ -209,7 +209,7 @@ describe('StreamImplementations', () => {
         let stream: BidiStreamImpl<string, string>;
 
         beforeEach(() => {
-            stream = new BidiStreamImpl(mockHybrid, mockClient);
+            stream = new BidiStreamImpl(mockHybrid, mockClient as any);
         });
 
         it('handles full duplex communication', () => {
