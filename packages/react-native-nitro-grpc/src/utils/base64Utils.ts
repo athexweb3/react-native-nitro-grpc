@@ -12,9 +12,8 @@ const HybridBase64 = NitroModules.createHybridObject<Base64>('Base64');
  * @param urlSafe - Use URL-safe encoding (Not yet supported in native, falls back to standard)
  * @returns Base64 encoded string
  */
-export function encodeBase64(data: Uint8Array, _urlSafe = false): string {
-  // TODO: Add urlSafe support to native
-  return HybridBase64.encode(data.buffer as ArrayBuffer);
+export function encodeBase64(data: Uint8Array, urlSafe = false): string {
+  return HybridBase64.encode(data.buffer as ArrayBuffer, urlSafe);
 }
 
 /**

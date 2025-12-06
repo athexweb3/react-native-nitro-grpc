@@ -4,10 +4,10 @@
 
 namespace margelo::nitro::grpc {
 
-std::string HybridBase64::encode(const std::shared_ptr<ArrayBuffer>& data) {
+std::string HybridBase64::encode(const std::shared_ptr<ArrayBuffer>& data, bool urlSafe) {
   if (!data)
     return "";
-  return base64_encode<std::string>(data->data(), data->size(), false);
+  return base64_encode<std::string>(data->data(), data->size(), urlSafe);
 }
 
 std::shared_ptr<ArrayBuffer> HybridBase64::decode(const std::string& base64) {
