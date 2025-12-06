@@ -22,53 +22,73 @@ cd ios && bun pods
 
 ## Usage
 
-### 1. Define your Service
-Create a `service.proto` file:
-
-```protobuf
-syntax = "proto3";
-
-service AuthService {
-  rpc Login (LoginRequest) returns (LoginResponse) {}
-}
-
-message LoginRequest {
-  string username = 1;
-  string password = 2;
-}
-
-message LoginResponse {
-  string token = 1;
-}
-```
-
-### 2. Generate Code
-Run the codegen command to generate TypeScript bindings:
-
-```bash
-bun nitro-grpc codegen
-```
-
-### 3. Implement in App
+### 1. Define your Types
+You can use any library to generate TypeScript implementations (like `ts-proto` or `protobufjs`), or define them manually:
 
 ```typescript
-import { AuthService } from './generated/service';
-import { GrpcClient } from 'react-native-nitro-grpc';
+// Types are just standard TypeScript interfaces!
+interface LoginRequest {
+  username: string;
+  password?: string;
+}
 
-const grpcClient = new GrpcClient('your-api.com:443');
-const client = new AuthService(grpcClient);
+interface LoginResponse {
+  token: string;
+}
+```
+
+### 2. Make Requests
+Use the `GrpcChannel` and `GrpcClient` to make requests to your server.
+
+```typescript
+import { GrpcChannel, GrpcClient, ChannelCredentials } from 'react-native-nitro-grpc';
+
+// 1. Create a Channel
+const channel = new GrpcChannel('localhost:50051', ChannelCredentials.createInsecure());
+
+// 2. Create a Client
+const client = new GrpcClient(channel);
 
 async function performLogin() {
   try {
-    const response = await client.login({ 
-      username: 'user', 
-      password: 'password123' 
-    });
+    // 3. Make a Call
+    const response = await client.unaryCall<LoginRequest, LoginResponse>(
+      '/AuthService/Login',
+      { username: 'user', password: 'password123' }
+    );
+    
     console.log('Token:', response.token);
   } catch (error) {
     console.error('Login failed:', error);
   }
 }
+```
+
+### 3. Use Interceptors
+Add powerful middleware for logging, retries, and authentication.
+
+```typescript
+import { 
+  GrpcClient, 
+  LoggingInterceptor, 
+  RetryInterceptor, 
+  GrpcStatus 
+} from 'react-native-nitro-grpc';
+
+const client = new GrpcClient(channel, [
+  // 1. Retry failed requests (Exponential Backoff)
+  new RetryInterceptor({
+    maxAttempts: 3,
+    initialBackoffMs: 500,
+    retryableStatusCodes: [GrpcStatus.UNAVAILABLE],
+  }),
+  
+  // 2. Log requests with redaction
+  new LoggingInterceptor({
+    sensitiveFields: ['password', 'token'],
+    logBody: true,
+  }),
+]);
 ```
 
 ## Comparison

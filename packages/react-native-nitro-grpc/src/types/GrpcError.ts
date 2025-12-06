@@ -26,7 +26,7 @@ export class GrpcError extends Error {
   /**
    * Human-readable error details from the server.
    */
-  public readonly details: string;
+  public readonly details?: string;
 
   /**
    * Trailing metadata sent by the server with the error (optional).
@@ -34,14 +34,19 @@ export class GrpcError extends Error {
    */
   public readonly metadata?: GrpcMetadata;
 
+  /**
+   * The underlying cause of this error.
+   */
+  public readonly cause?: unknown;
+
   constructor(
     code: GrpcStatus,
-    details: string,
-    metadata?: GrpcMetadata,
-    cause?: Error
+    message: string,
+    cause?: unknown,
+    details?: string,
+    metadata?: GrpcMetadata
   ) {
-    // Create a descriptive error message
-    const message = `gRPC Error [${GrpcStatus[code]}]: ${details}`;
+    // Standard Error constructor only takes message in older libs
     super(message);
 
     // Set the prototype explicitly (required for extending built-in classes in TS)
@@ -51,15 +56,12 @@ export class GrpcError extends Error {
     this.code = code;
     this.details = details;
     this.metadata = metadata;
+    this.cause = cause;
 
-    // Preserve the original error as cause if provided
-    if (cause) {
-      this.cause = cause;
-    }
-
-    // Maintain proper stack trace (V8 engines)
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, GrpcError);
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if ('captureStackTrace' in Error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Error as any).captureStackTrace(this, GrpcError);
     }
   }
 

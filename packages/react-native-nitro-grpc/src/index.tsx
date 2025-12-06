@@ -1,7 +1,7 @@
 // Core client and channel exports
 export { GrpcClient } from './client/GrpcClient';
 export { GrpcChannel } from './client/GrpcChannel';
-export type { GrpcCallOptions } from './client/GrpcCallOptions';
+export type { GrpcCallOptions } from './types/GrpcCallOptions';
 
 // Type system exports
 export { GrpcMetadata } from './types/GrpcMetadata';

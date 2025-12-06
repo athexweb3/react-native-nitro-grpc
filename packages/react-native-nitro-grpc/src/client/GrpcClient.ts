@@ -1,6 +1,6 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { GrpcCallOptions } from './GrpcCallOptions';
+import type { GrpcCallOptions } from '../types/GrpcCallOptions';
 import type { GrpcChannel } from './GrpcChannel';
 import { GrpcMetadata } from '../types/GrpcMetadata';
 import { GrpcError } from '../types/GrpcError';
@@ -48,13 +48,19 @@ import type {
 export class GrpcClient {
   private _hybrid: HybridGrpcClient;
   private _channel?: GrpcChannel;
+  private _interceptors: import('../types/GrpcInterceptor').GrpcInterceptor[] =
+    [];
 
   /**
    * Creates a new gRPC client.
    *
    * @param channel - Optional GrpcChannel instance. If not provided, creates standalone client.
+   * @param interceptors - Optional list of interceptors to apply to each call.
    */
-  constructor(channel?: GrpcChannel) {
+  constructor(
+    channel?: GrpcChannel,
+    interceptors: import('../types/GrpcInterceptor').GrpcInterceptor[] = []
+  ) {
     if (channel) {
       this._channel = channel;
       this._hybrid = channel._getHybridClient();
@@ -63,6 +69,7 @@ export class GrpcClient {
       this._hybrid =
         NitroModules.createHybridObject<HybridGrpcClient>('GrpcClient');
     }
+    this._interceptors = interceptors;
   }
 
   /**
@@ -105,32 +112,40 @@ export class GrpcClient {
     options?: GrpcCallOptions
   ): Promise<Res> {
     try {
-      // Serialize request to ArrayBuffer
-      const requestBuffer = this._serializeMessage(request);
-
-      // Prepare metadata and deadline
-      const metadata = options?.metadata || new GrpcMetadata();
-      const metadataJson = JSON.stringify(metadata.toJSON());
-      const deadlineMs = this._calculateDeadline(options?.deadline);
-
-      // Handle AbortSignal
-      if (options?.signal) {
-        this._checkAborted(options.signal);
-        // TODO: Implement cancellation when signal aborts
-      }
-
-      // Make the call
-      const responseBuffer = await this._hybrid.unaryCall(
+      return await this._applyUnaryInterceptors(
         method,
-        requestBuffer,
-        metadataJson,
-        deadlineMs
-      );
+        request,
+        options,
+        async (m, r, o) => {
+          // Serialize request to ArrayBuffer
+          const requestBuffer = this._serializeMessage(r);
 
-      // Deserialize response
-      return this._deserializeMessage<Res>(responseBuffer);
+          // Prepare metadata and deadline
+          const metadata = o?.metadata || new GrpcMetadata();
+          const metadataJson = JSON.stringify(metadata.toJSON());
+          const deadlineMs = this._calculateDeadline(o?.deadline);
+
+          // Handle AbortSignal
+          if (o?.signal) {
+            this._checkAborted(o.signal);
+            // TODO: Implement cancellation when signal aborts
+          }
+
+          // Make the call
+          const responseBuffer = await this._hybrid.unaryCall(
+            m,
+            requestBuffer,
+            metadataJson,
+            deadlineMs
+          );
+
+          // Deserialize response
+          return this._deserializeMessage<Res>(responseBuffer);
+        }
+      );
     } catch (error) {
-      throw this._wrapError(error);
+      console.error(`[GrpcClient] Unary call failed: ${method}`, error);
+      throw error;
     }
   }
 
@@ -307,16 +322,41 @@ export class GrpcClient {
   }
 
   /**
-   * Wraps unknown errors into GrpcError.
+   * Applies unary interceptors to the call.
    * @internal
    */
-  private _wrapError(error: unknown): GrpcError {
-    if (error instanceof GrpcError) {
-      return error;
+  private async _applyUnaryInterceptors<Req, Res>(
+    method: string,
+    request: Req,
+    options: GrpcCallOptions | undefined,
+    finalCall: (m: string, r: Req, o: GrpcCallOptions) => Promise<Res>
+  ): Promise<Res> {
+    const interceptors = this._interceptors
+      .map((i) => i.unary)
+      .filter(
+        (i): i is import('../types/GrpcInterceptor').UnaryInterceptor =>
+          i !== undefined
+      );
+
+    if (interceptors.length === 0) {
+      return finalCall(method, request, options || {});
     }
-    if (error instanceof Error) {
-      return new GrpcError(GrpcStatus.UNKNOWN, error.message, undefined, error);
-    }
-    return new GrpcError(GrpcStatus.UNKNOWN, String(error));
+
+    let index = 0;
+    const next = async (m: string, r: unknown, o: GrpcCallOptions) => {
+      if (index >= interceptors.length) {
+        return finalCall(m, r as Req, o);
+      }
+      const interceptor = interceptors[index++];
+
+      return interceptor!(
+        m,
+        r,
+        o,
+        next as unknown as import('../types/GrpcInterceptor').NextUnaryFn
+      );
+    };
+
+    return next(method, request, options || {}) as Promise<Res>;
   }
 }

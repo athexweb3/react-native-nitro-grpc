@@ -20,6 +20,21 @@ export interface GrpcClient
   close(): void;
 
   /**
+   * Gets the current connectivity state of the channel.
+   * @param tryToConnect Whether to try to connect if idle
+   * @returns The current state (enum value)
+   */
+  getConnectivityState(tryToConnect: boolean): number;
+
+  /**
+   * Watches for connectivity state changes.
+   * Resolves when the state changes from `lastState`.
+   * @param lastState The state to watch from
+   * @param deadlineMs Deadline in milliseconds
+   */
+  watchConnectivityState(lastState: number, deadlineMs: number): Promise<void>;
+
+  /**
    * Makes a unary call.
    * @param method The method name (e.g. "/MyService/MyMethod")
    * @param request The serialized request message
