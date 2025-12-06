@@ -8,11 +8,19 @@ import { TestDetailsScreen } from '../screens/TestDetailsScreen';
 const Stack = createNativeStackNavigator();
 
 export function RootStack() {
-    return (
-        <Stack.Navigator>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="TestSuites" component={TestSuitesScreen} options={{ title: 'Test Suites' }} />
-            <Stack.Screen name="TestDetailsScreen" component={TestDetailsScreen} options={{ title: 'Results' }} />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen
+        name="TestSuites"
+        component={TestSuitesScreen}
+        options={{ title: 'Test Suites' }}
+      />
+      <Stack.Screen
+        name="TestDetailsScreen"
+        component={TestDetailsScreen}
+        options={{ title: 'Results' }}
+      />
+    </Stack.Navigator>
+  );
 }
