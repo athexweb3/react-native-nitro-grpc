@@ -12,7 +12,7 @@ constexpr int CHUNK_SIZE = 16384; // 16KB chunks
 
 std::shared_ptr<ArrayBuffer> HybridGzip::gzip(const std::shared_ptr<ArrayBuffer>& data) {
   if (!data || data->size() == 0) {
-    return std::make_shared<ArrayBuffer>(0);
+    return ArrayBuffer::allocate(0);
   }
 
   z_stream strm;
@@ -59,14 +59,12 @@ std::shared_ptr<ArrayBuffer> HybridGzip::gzip(const std::shared_ptr<ArrayBuffer>
   deflateEnd(&strm);
 
   // Convert vector to ArrayBuffer
-  auto result = std::make_shared<ArrayBuffer>(outBuffer.size());
-  std::copy(outBuffer.begin(), outBuffer.end(), result->data());
-  return result;
+  return ArrayBuffer::copy(outBuffer);
 }
 
 std::shared_ptr<ArrayBuffer> HybridGzip::ungzip(const std::shared_ptr<ArrayBuffer>& data) {
   if (!data || data->size() == 0) {
-    return std::make_shared<ArrayBuffer>(0);
+    return ArrayBuffer::allocate(0);
   }
 
   z_stream strm;
@@ -123,9 +121,7 @@ std::shared_ptr<ArrayBuffer> HybridGzip::ungzip(const std::shared_ptr<ArrayBuffe
     // throw std::runtime_error("Zlib decompression incomplete");
   }
 
-  auto result = std::make_shared<ArrayBuffer>(outBuffer.size());
-  std::copy(outBuffer.begin(), outBuffer.end(), result->data());
-  return result;
+  return ArrayBuffer::copy(outBuffer);
 }
 
 } // namespace margelo::nitro::grpc

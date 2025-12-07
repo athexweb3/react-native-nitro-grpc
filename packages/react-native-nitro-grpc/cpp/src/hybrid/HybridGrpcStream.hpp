@@ -12,7 +12,7 @@ using namespace margelo::nitro;
 
 class HybridGrpcStream : public HybridGrpcStreamSpec {
  public:
-  HybridGrpcStream() : HybridGrpcStreamSpec() {}
+  HybridGrpcStream() : HybridObject(TAG) {}
 
   void write(const std::shared_ptr<ArrayBuffer>& data) override {
     // TODO: Implement write
@@ -26,12 +26,21 @@ class HybridGrpcStream : public HybridGrpcStreamSpec {
     // TODO: Store callback
   }
 
-  void onEnd(const std::function<void()>& callback) override {
+  void onMetadata(const std::function<void(const std::string& /* metadataJson */)>& callback) override {
+    // TODO: Store callback
+  }
+
+  void onStatus(const std::function<void(double /* code */, const std::string& /* message */, const std::string& /* metadataJson */)>&
+                    callback) override {
     // TODO: Store callback
   }
 
   void onError(const std::function<void(const std::string& /* error */)>& callback) override {
     // TODO: Store callback
+  }
+
+  void cancel() override {
+    // TODO: Implement cancel
   }
 };
 

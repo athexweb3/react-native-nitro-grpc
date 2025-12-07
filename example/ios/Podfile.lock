@@ -1336,6 +1336,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - nlohmann_json (3.7.3)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -3706,6 +3707,7 @@ PODS:
     - gRPC-Core
     - hermes-engine
     - NitroModules
+    - nlohmann_json
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -3828,7 +3830,7 @@ DEPENDENCIES:
   - "gRPC-C++"
   - gRPC-Core
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
-  - NitroModules (from `../node_modules/react-native-nitro-modules`)
+  - NitroModules (from `../../node_modules/react-native-nitro-modules`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -3863,8 +3865,8 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
-  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
-  - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-get-random-values (from `../../node_modules/react-native-get-random-values`)
+  - react-native-safe-area-context (from `../../node_modules/react-native-safe-area-context`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -3895,9 +3897,9 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - RNGrpc (from `../node_modules/react-native-nitro-grpc`)
+  - RNGrpc (from `../../node_modules/react-native-nitro-grpc`)
   - RNScreens (from `../node_modules/react-native-screens`)
-  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - RNVectorIcons (from `../../node_modules/react-native-vector-icons`)
   - SocketRocket (~> 0.7.1)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -3907,6 +3909,7 @@ SPEC REPOS:
     - BoringSSL-GRPC
     - "gRPC-C++"
     - gRPC-Core
+    - nlohmann_json
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -3926,7 +3929,7 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-07-07-RNv0.81.0-e0fc67142ec0763c6b6153ca2bf96df815539782
   NitroModules:
-    :path: "../node_modules/react-native-nitro-modules"
+    :path: "../../node_modules/react-native-nitro-modules"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -3994,9 +3997,9 @@ EXTERNAL SOURCES:
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-get-random-values:
-    :path: "../node_modules/react-native-get-random-values"
+    :path: "../../node_modules/react-native-get-random-values"
   react-native-safe-area-context:
-    :path: "../node_modules/react-native-safe-area-context"
+    :path: "../../node_modules/react-native-safe-area-context"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -4058,11 +4061,11 @@ EXTERNAL SOURCES:
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
   RNGrpc:
-    :path: "../node_modules/react-native-nitro-grpc"
+    :path: "../../node_modules/react-native-nitro-grpc"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNVectorIcons:
-    :path: "../node_modules/react-native-vector-icons"
+    :path: "../../node_modules/react-native-vector-icons"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -4079,6 +4082,7 @@ SPEC CHECKSUMS:
   gRPC-Core: ba9d3592f830c7f570e000961362da1abf37907f
   hermes-engine: 4f8246b1f6d79f625e0d99472d1f3a71da4d28ca
   NitroModules: 808eee1dfaf75b2c5a63ea3608cb651cc7d13687
+  nlohmann_json: c3abe3235427eaf95e49463edf769a4f28d02bee
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: c4b9e2fd0ab200e3af72b013ed6113187c607077
   RCTRequired: e97dd5dafc1db8094e63bc5031e0371f092ae92a
@@ -4142,14 +4146,14 @@ SPEC CHECKSUMS:
   React-timing: 97ada2c47b4c5932e7f773c7d239c52b90d6ca68
   React-utils: f0949d247a46b4c09f03e5a3cb1167602d0b729a
   ReactAppDependencyProvider: 3eb9096cb139eb433965693bbe541d96eb3d3ec9
-  ReactCodegen: 76f659354774658341c9dd417660f1776451f56f
+  ReactCodegen: 4d203eddf6f977caa324640a20f92e70408d648b
   ReactCommon: ce5d4226dfaf9d5dacbef57b4528819e39d3a120
-  RNGrpc: 45ff027af72cca40e1403837ff816399228ac141
+  RNGrpc: 7746bd8b2f526c85a4562e2b283b0fc50d17db89
   RNScreens: d821082c6dd1cb397cc0c98b026eeafaa68be479
   RNVectorIcons: 791f13226ec4a3fd13062eda9e892159f0981fae
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 11c9686a21e2cd82a094a723649d9f4507200fb0
 
-PODFILE CHECKSUM: c86741dbc2cedd19ea916ea80cd710c80bb1ee02
+PODFILE CHECKSUM: 58113d6105477d474102f4f519398492d671fdc2
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

@@ -18,7 +18,7 @@ end
 
 
 # Import the gRPC fix script from the package
-pkg_path = File.join(File.dirname(`node --print "require.resolve('react-native-nitro-grpc/package.json')"`), "scripts/fix-grpc.rb")
+pkg_path = File.join(File.dirname(`node --print "require.resolve('react-native-nitro-grpc/package.json')"`.strip), "scripts/fix-grpc.rb")
 require pkg_path if File.exist?(pkg_path)
 
 target 'GrpcExample' do

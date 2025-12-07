@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "devDependencies": {
@@ -46,6 +47,7 @@
       },
       "devDependencies": {
         "@babel/core": "^7.25.2",
+        "@babel/plugin-transform-class-static-block": "^7.28.3",
         "@babel/preset-env": "^7.25.3",
         "@babel/runtime": "^7.25.0",
         "@react-native-community/cli": "20.0.0",

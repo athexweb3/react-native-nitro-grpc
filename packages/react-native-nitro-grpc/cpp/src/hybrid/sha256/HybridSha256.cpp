@@ -10,7 +10,8 @@ std::string HybridSha256::hash(const std::string& data) {
 
 std::string HybridSha256::hashBytes(const std::shared_ptr<ArrayBuffer>& data) {
   if (!data || data->size() == 0) {
-    return picosha2::hash256_hex_string("");
+    std::string empty;
+    return picosha2::hash256_hex_string(empty);
   }
 
   uint8_t* bytes = data->data();

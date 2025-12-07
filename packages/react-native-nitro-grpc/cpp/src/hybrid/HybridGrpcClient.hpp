@@ -20,19 +20,23 @@ class HybridGrpcClient : public HybridGrpcClientSpec {
 
   void close() override;
 
+  double getConnectivityState(bool tryToConnect) override;
+
+  std::shared_ptr<Promise<void>> watchConnectivityState(double lastState, double deadlineMs) override;
+
   // Unary call
   std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> unaryCall(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                                                                   const std::string& metadataJson, double deadline) override;
+                                                                   const std::string& metadataJson, double deadlineMs) override;
 
   // Streaming (to be implemented)
   std::shared_ptr<HybridGrpcStreamSpec> createServerStream(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                                                           const std::string& metadataJson, double deadline) override;
+                                                           const std::string& metadataJson, double deadlineMs) override;
 
   std::shared_ptr<HybridGrpcStreamSpec> createClientStream(const std::string& method, const std::string& metadataJson,
-                                                           double deadline) override;
+                                                           double deadlineMs) override;
 
   std::shared_ptr<HybridGrpcStreamSpec> createBidiStream(const std::string& method, const std::string& metadataJson,
-                                                         double deadline) override;
+                                                         double deadlineMs) override;
 
  private:
   std::shared_ptr<::grpc::Channel> _channel;

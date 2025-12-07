@@ -21,19 +21,34 @@ void HybridGrpcClient::close() {
   _channel.reset();
 }
 
+double HybridGrpcClient::getConnectivityState(bool tryToConnect) {
+  if (!_channel) {
+    return 4; // SHUTDOWN
+  }
+  auto state = _channel->GetState(tryToConnect);
+  return static_cast<double>(state);
+}
+
+std::shared_ptr<Promise<void>> HybridGrpcClient::watchConnectivityState(double lastState, double deadlineMs) {
+  auto promise = Promise<void>::create();
+  // TODO: Implement watchConnectivityState properly
+  promise->reject(std::make_exception_ptr(std::runtime_error("watchConnectivityState not yet implemented")));
+  return promise;
+}
+
 std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> HybridGrpcClient::unaryCall(const std::string& method,
                                                                                    const std::shared_ptr<ArrayBuffer>& request,
-                                                                                   const std::string& metadataJson, double deadline) {
+                                                                                   const std::string& metadataJson, double deadlineMs) {
   if (_closed || !_channel) {
     auto promise = Promise<std::shared_ptr<ArrayBuffer>>::create();
-    promise->reject(std::runtime_error("Channel is closed"));
+    promise->reject(std::make_exception_ptr(std::runtime_error("Channel is closed")));
     return promise;
   }
 
   auto promise = Promise<std::shared_ptr<ArrayBuffer>>::create();
-  int64_t deadlineMs = static_cast<int64_t>(deadline);
+  int64_t deadlineMsInt = static_cast<int64_t>(deadlineMs);
 
-  UnaryCall::execute(_channel, method, request, metadataJson, deadlineMs, promise);
+  UnaryCall::execute(_channel, method, request, metadataJson, deadlineMsInt, promise);
 
   return promise;
 }
