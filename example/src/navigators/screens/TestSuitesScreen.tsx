@@ -1,10 +1,10 @@
 import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, FlatList, Button, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { TestItem } from '../components/TestItem';
-import { useTestsList } from '../hooks/useTestsList';
-import { useTestsRun } from '../hooks/useTestsRun';
-import { colors } from '../styles/colors';
+import { TestItem } from '../../components/TestItem';
+import { useTestsList } from '../../hooks/useTestsList';
+import { useTestsRun } from '../../hooks/useTestsRun';
+import { colors } from '../../styles/colors';
 
 export function TestSuitesScreen() {
   const navigation = useNavigation();

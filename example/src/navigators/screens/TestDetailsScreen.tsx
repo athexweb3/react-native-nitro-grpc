@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { colors } from '../styles/colors';
-import type { TestResult } from '../types/Results';
+import { colors } from '../../styles/colors';
+import type { TestResult } from '../../types/Results';
 
 export function TestDetailsScreen({
   route,

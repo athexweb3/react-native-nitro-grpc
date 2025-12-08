@@ -4,8 +4,7 @@
   "source": "packages/react-native-nitro-grpc/src",
   "workspaces": [
     "packages/react-native-nitro-grpc",
-    "example",
-    "example-expo"
+    "example"
   ],
   "description": "High-performance gRPC for React Native powered by C++ and Nitro Modules.",
   "scripts": {

@@ -136,41 +136,28 @@ module RNGrpc
       end
     end
 
-    # Manually copy/symlink module map to where CocoaPods expects it
-    # This fixes the "gRPC-C++-dummy.m" error where it looks for it in Headers/Private
-    src_map = File.join(installer.sandbox.root, 'gRPC-Core/include/grpc/module.modulemap')
+    # Add a pre-build script phase to create the gRPC module map symlink
+    # This ensures the symlink exists even after CocoaPods cleans up headers
+    installer.pods_project.targets.each do |target|
+      if target.name.include?('gRPC-C++') || target.name.include?('Pods-')
+        script_phase = target.new_shell_script_build_phase('Create gRPC Module Map Symlink')
+        script_phase.shell_script = <<~SCRIPT
+          set -e
+          PODS_ROOT="${PODS_ROOT:-${SRCROOT}}"
+          SRC_MAP="$PODS_ROOT/gRPC-Core/include/grpc/module.modulemap"
 
-    # Destination 1: Public Headers
-    # Pods/Headers/Public/grpc/module.modulemap
-    pub_headers = File.join(installer.sandbox.root, 'Headers/Public/grpc')
-    FileUtils.mkdir_p(pub_headers)
-    dst_map_pub = File.join(pub_headers, 'module.modulemap')
+          if [ -f "$SRC_MAP" ]; then
+            mkdir -p "$PODS_ROOT/Headers/Private/grpc"
+            ln -sf "$SRC_MAP" "$PODS_ROOT/Headers/Private/grpc/gRPC-Core.modulemap" 2>/dev/null || true
 
-    if File.exist?(src_map)
-      # Force link
-      File.delete(dst_map_pub) if File.exist?(dst_map_pub) || File.symlink?(dst_map_pub)
-      File.symlink(src_map, dst_map_pub)
+            mkdir -p "$PODS_ROOT/Headers/Public/grpc"
+            ln -sf "$SRC_MAP" "$PODS_ROOT/Headers/Public/grpc/module.modulemap" 2>/dev/null || true
+          fi
+        SCRIPT
 
-      if File.exist?(dst_map_pub)
-         File.open(log_file, 'a') { |f| f.puts "Debug: Public symlink created at #{dst_map_pub}" }
-      else
-         File.open(log_file, 'a') { |f| f.puts "Debug: Failed to check public symlink at #{dst_map_pub}" }
+        target.build_phases.move(script_phase, 0)
+        Pod::UI.puts "Added gRPC module map symlink script to #{target.name}".green
       end
-    end
-
-    # Destination 2: Private Headers (sometimes needed by dummy targets)
-    # Pods/Headers/Private/grpc/gRPC-Core.modulemap
-    priv_headers = File.join(installer.sandbox.root, 'Headers/Private/grpc')
-    FileUtils.mkdir_p(priv_headers)
-    dst_map_priv = File.join(priv_headers, 'gRPC-Core.modulemap')
-
-    if File.exist?(src_map)
-        File.delete(dst_map_priv) if File.exist?(dst_map_priv) || File.symlink?(dst_map_priv)
-        File.symlink(src_map, dst_map_priv)
-
-        if File.exist?(dst_map_priv)
-         File.open(log_file, 'a') { |f| f.puts "Debug: Private symlink created at #{dst_map_priv}" }
-        end
     end
 
   end
