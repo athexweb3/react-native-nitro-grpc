@@ -1,10 +1,10 @@
 import {
-  encodeBase64,
   decodeBase64,
+  encodeBase64,
+  isUint8Array,
   stringToUint8Array,
   uint8ArrayToString,
-  isUint8Array,
-} from '../base64Utils';
+} from '../base64';
 
 describe('base64Utils', () => {
   describe('encodeBase64', () => {

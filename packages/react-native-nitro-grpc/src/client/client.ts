@@ -1,20 +1,12 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { GrpcCallOptions } from '../types/GrpcCallOptions';
-import type { GrpcChannel } from './GrpcChannel';
-import { GrpcMetadata } from '../types/GrpcMetadata';
+import { BidiStreamImpl, ClientStreamImpl, ServerStreamImpl } from '../stream';
+import type { GrpcCallOptions } from '../types/callOptions';
 import { GrpcError } from '../types/GrpcError';
 import { GrpcStatus } from '../types/GrpcStatus';
-import {
-  ServerStreamImpl,
-  ClientStreamImpl,
-  BidiStreamImpl,
-} from '../stream/StreamImplementations';
-import type {
-  ServerStream,
-  ClientStream,
-  BidiStream,
-} from '../types/StreamTypes';
+import { GrpcMetadata } from '../types/metadata';
+import type { BidiStream, ClientStream, ServerStream } from '../types/stream';
+import type { GrpcChannel } from './channel';
 
 /**
  * gRPC client for making calls to a server.
@@ -48,8 +40,7 @@ import type {
 export class GrpcClient {
   private _hybrid: HybridGrpcClient;
   private _channel?: GrpcChannel;
-  private _interceptors: import('../types/GrpcInterceptor').GrpcInterceptor[] =
-    [];
+  private _interceptors: import('../types/interceptor').GrpcInterceptor[] = [];
 
   /**
    * Creates a new gRPC client.
@@ -59,7 +50,7 @@ export class GrpcClient {
    */
   constructor(
     channel?: GrpcChannel,
-    interceptors: import('../types/GrpcInterceptor').GrpcInterceptor[] = []
+    interceptors: import('../types/interceptor').GrpcInterceptor[] = []
   ) {
     if (channel) {
       this._channel = channel;
@@ -334,7 +325,7 @@ export class GrpcClient {
     const interceptors = this._interceptors
       .map((i) => i.unary)
       .filter(
-        (i): i is import('../types/GrpcInterceptor').UnaryInterceptor =>
+        (i): i is import('../types/interceptor').UnaryInterceptor =>
           i !== undefined
       );
 
@@ -353,7 +344,7 @@ export class GrpcClient {
         m,
         r,
         o,
-        next as unknown as import('../types/GrpcInterceptor').NextUnaryFn
+        next as unknown as import('../types/interceptor').NextUnaryFn
       );
     };
 

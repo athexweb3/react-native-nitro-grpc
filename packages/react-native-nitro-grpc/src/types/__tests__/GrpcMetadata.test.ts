@@ -1,5 +1,5 @@
-import { GrpcMetadata } from '../GrpcMetadata';
-import { stringToUint8Array } from '../../utils/base64Utils';
+import { stringToUint8Array } from '../../utils/base64';
+import { GrpcMetadata } from '../metadata';
 
 describe('GrpcMetadata', () => {
   let metadata: GrpcMetadata;

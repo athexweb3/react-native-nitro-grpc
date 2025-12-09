@@ -1,7 +1,6 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { Sha256 } from '../specs/Sha256.nitro';
 
-// Load the Hybrid Object
 const HybridSha256 = NitroModules.createHybridObject<Sha256>('Sha256');
 
 /**

@@ -1,24 +1,24 @@
-export * from './errorUtils';
-export * from './validationUtils';
-export * from './deadlineUtils';
-export * from './metadataUtils';
-export * from './base64Utils';
+export * from './base64';
+export * from './deadline';
+export * from './error';
+export * from './metadata';
+export * from './validation';
 
 // Deadline utilities
 export {
-  toAbsoluteDeadline,
-  getRemainingTime,
-  isDeadlineExpired,
   createDeadline,
   formatDeadline,
-} from './deadlineUtils';
+  getRemainingTime,
+  isDeadlineExpired,
+  toAbsoluteDeadline,
+} from './deadline';
 
 // Metadata utilities
 export {
   createMetadata,
-  mergeMetadata,
   filterMetadataByPrefix,
-  metadataToObject,
-  hasMetadataKey,
   getMetadataAsString,
-} from './metadataUtils';
+  hasMetadataKey,
+  mergeMetadata,
+  metadataToObject,
+} from './metadata';

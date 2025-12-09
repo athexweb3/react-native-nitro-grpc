@@ -1,15 +1,8 @@
-import {
-  ServerStreamImpl,
-  ClientStreamImpl,
-  BidiStreamImpl,
-} from '../StreamImplementations';
+import { BidiStreamImpl, ClientStreamImpl, ServerStreamImpl } from '..';
 import type { GrpcStream } from '../../specs/GrpcStream.nitro';
-import { GrpcMetadata } from '../../types/GrpcMetadata';
 import { GrpcStatus } from '../../types/GrpcStatus';
-import {
-  stringToUint8Array,
-  uint8ArrayToString,
-} from '../../utils/base64Utils';
+import { GrpcMetadata } from '../../types/metadata';
+import { stringToUint8Array, uint8ArrayToString } from '../../utils/base64';
 
 // Mock implementation of HybridGrpcStream
 class MockHybridStream implements GrpcStream {

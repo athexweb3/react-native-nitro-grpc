@@ -1,5 +1,5 @@
 import { GrpcStatus } from './GrpcStatus';
-import { GrpcMetadata } from './GrpcMetadata';
+import { GrpcMetadata } from './metadata';
 
 /**
  * gRPC-specific error class that extends the standard Error.

@@ -1,4 +1,4 @@
-import { generateUUID } from '../uuidUtils';
+import { generateUUID } from '../uuid';
 
 // Mock NitroModules before importing the util
 jest.mock('react-native-nitro-modules', () => ({

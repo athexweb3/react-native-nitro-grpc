@@ -1,42 +1,36 @@
-// Core client and channel exports
-export { GrpcClient } from './client/GrpcClient';
-export { GrpcChannel } from './client/GrpcChannel';
-export type { GrpcCallOptions } from './types/GrpcCallOptions';
+export { GrpcChannel } from './client/channel';
+export { GrpcClient } from './client/client';
+export type { GrpcCallOptions } from './types/callOptions';
 
-// Type system exports
-export { GrpcMetadata } from './types/GrpcMetadata';
-export { GrpcError } from './types/GrpcError';
-export { GrpcStatus } from './types/GrpcStatus';
-export {
-  ChannelCredentials,
-  CallCredentials,
-  type GrpcChannelCredentials,
-  type GrpcCallCredentials,
-  type InsecureCredentials,
-  type SslCredentials,
-} from './types/GrpcCredentials';
 export {
   ChannelState,
-  type StatusObject,
   type ChannelOptions,
+  type StatusObject,
 } from './types/ChannelTypes';
+export {
+  CallCredentials,
+  ChannelCredentials,
+  type GrpcCallCredentials,
+  type GrpcChannelCredentials,
+  type InsecureCredentials,
+  type SslCredentials,
+} from './types/credentials';
+export { GrpcError } from './types/GrpcError';
+export { GrpcStatus } from './types/GrpcStatus';
+export { GrpcMetadata } from './types/metadata';
 
 // Stream type exports
-export type {
-  ServerStream,
-  ClientStream,
-  BidiStream,
-} from './types/StreamTypes';
+export type { BidiStream, ClientStream, ServerStream } from './types/stream';
 
 // For backward compatibility (legacy API)
-export type { Metadata, MetadataValue } from './types/GrpcMetadata';
+export type { Metadata, MetadataValue } from './types/metadata';
 
 // Utility functions
-export * from './utils/base64Utils';
-export * from './utils/sha256Utils';
-export * from './utils/gzipUtils';
-export * from './utils/uuidUtils';
-export * from './stream/StreamImplementations';
+export * from './stream';
+export * from './utils/base64';
+export * from './utils/gzip';
+export * from './utils/sha256';
+export * from './utils/uuid';
 
 /**
  * Main entry point for react-native-nitro-grpc.

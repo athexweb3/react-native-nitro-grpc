@@ -1,7 +1,6 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { Uuid } from '../specs/Uuid.nitro';
 
-// Load the Hybrid Object
 const HybridUuid = NitroModules.createHybridObject<Uuid>('Uuid');
 
 /**

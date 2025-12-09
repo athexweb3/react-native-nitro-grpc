@@ -1,7 +1,6 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { Gzip } from '../specs/Gzip.nitro';
 
-// Load the Hybrid Object
 const HybridGzip = NitroModules.createHybridObject<Gzip>('Gzip');
 
 /**

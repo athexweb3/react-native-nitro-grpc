@@ -1,15 +1,15 @@
+import type { GrpcCallOptions } from '../types/callOptions';
 import type {
   GrpcInterceptor,
   NextUnaryFn,
   UnaryInterceptor,
-} from '../types/GrpcInterceptor';
+} from '../types/interceptor';
 import type {
-  LoggingInterceptorOptions,
   Logger,
+  LoggingInterceptorOptions,
   LogLevel,
 } from '../types/LoggingInterceptorOptions';
-import type { GrpcCallOptions } from '../types/GrpcCallOptions';
-import { GrpcMetadata } from '../types/GrpcMetadata';
+import { GrpcMetadata } from '../types/metadata';
 
 /**
  * A production-grade gRPC logging interceptor.

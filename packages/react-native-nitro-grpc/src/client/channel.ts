@@ -1,8 +1,8 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { GrpcChannelCredentials } from '../types/GrpcCredentials';
-import { ChannelCredentials } from '../types/GrpcCredentials';
 import type { ChannelOptions, ChannelState } from '../types/ChannelTypes';
+import type { GrpcChannelCredentials } from '../types/credentials';
+import { ChannelCredentials } from '../types/credentials';
 
 /**
  * Represents a gRPC channel - a connection to a specific server endpoint.

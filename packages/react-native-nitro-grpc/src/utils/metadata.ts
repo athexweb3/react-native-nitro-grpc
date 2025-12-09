@@ -1,5 +1,5 @@
-import { GrpcMetadata } from '../types/GrpcMetadata';
-import { isUint8Array, uint8ArrayToString } from './base64Utils';
+import { GrpcMetadata } from '../types/metadata';
+import { isUint8Array, uint8ArrayToString } from './base64';
 
 /**
  * Creates a new GrpcMetadata instance from a plain object.

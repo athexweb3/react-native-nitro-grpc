@@ -1,9 +1,9 @@
 import type { GrpcStream as HybridGrpcStream } from '../specs/GrpcStream.nitro';
-import { ServerStream, ClientStream, BidiStream } from '../types/StreamTypes';
-import { GrpcMetadata } from '../types/GrpcMetadata';
+import type { StatusObject } from '../types/ChannelTypes';
 import { GrpcError } from '../types/GrpcError';
 import { GrpcStatus } from '../types/GrpcStatus';
-import type { StatusObject } from '../types/ChannelTypes';
+import { GrpcMetadata } from '../types/metadata';
+import { BidiStream, ClientStream, ServerStream } from '../types/stream';
 
 /**
  * Server streaming implementation (read-only).
