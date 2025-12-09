@@ -1,7 +1,7 @@
-import { GrpcClient } from '../../client/GrpcClient';
-import { GrpcChannel } from '../../client/GrpcChannel';
-import { GrpcMetadata } from '../../types/GrpcMetadata';
-import { type GrpcInterceptor } from '../../types/GrpcInterceptor';
+import { GrpcChannel } from '../../client/channel';
+import { GrpcClient } from '../../client/client';
+import { type GrpcInterceptor } from '../../types/interceptor';
+import { GrpcMetadata } from '../../types/metadata';
 
 // Mock GrpcChannel and HybridClient
 const mockHybridClient = {
@@ -36,8 +36,8 @@ describe('Interceptor Chain', () => {
       unary: async <Req, Res>(
         method: string,
         req: Req,
-        options: import('../../types/GrpcCallOptions').GrpcCallOptions,
-        next: import('../../types/GrpcInterceptor').NextUnaryFn
+        options: import('../../types/callOptions').GrpcCallOptions,
+        next: import('../../types/interceptor').NextUnaryFn
       ) => {
         order.push('1-start');
         const res = await next(method, req, options);
@@ -50,8 +50,8 @@ describe('Interceptor Chain', () => {
       unary: async <Req, Res>(
         method: string,
         req: Req,
-        options: import('../../types/GrpcCallOptions').GrpcCallOptions,
-        next: import('../../types/GrpcInterceptor').NextUnaryFn
+        options: import('../../types/callOptions').GrpcCallOptions,
+        next: import('../../types/interceptor').NextUnaryFn
       ) => {
         order.push('2-start');
         const res = await next(method, req, options);
@@ -74,8 +74,8 @@ describe('Interceptor Chain', () => {
       unary: async <Req, Res>(
         method: string,
         req: Req,
-        options: import('../../types/GrpcCallOptions').GrpcCallOptions,
-        next: import('../../types/GrpcInterceptor').NextUnaryFn
+        options: import('../../types/callOptions').GrpcCallOptions,
+        next: import('../../types/interceptor').NextUnaryFn
       ) => {
         const metadata = options.metadata || new GrpcMetadata();
         metadata.add('custom-header', 'value');

@@ -1,5 +1,5 @@
-import type { GrpcMetadata } from './GrpcMetadata';
-import type { GrpcCallCredentials } from './GrpcCredentials';
+import type { GrpcCallCredentials } from './credentials';
+import type { GrpcMetadata } from './metadata';
 
 /**
  * Options for configuring individual gRPC calls.

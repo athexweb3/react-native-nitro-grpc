@@ -1,4 +1,4 @@
-import { encodeBase64, decodeBase64, isUint8Array } from '../utils/base64Utils';
+import { decodeBase64, encodeBase64, isUint8Array } from '../utils/base64';
 
 /**
  * Simple type definitions for metadata values.

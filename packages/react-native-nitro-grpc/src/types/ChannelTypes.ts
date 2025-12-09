@@ -1,4 +1,4 @@
-import { GrpcMetadata } from './GrpcMetadata';
+import { GrpcMetadata } from './metadata';
 
 /**
  * Connectivity state of a gRPC channel.

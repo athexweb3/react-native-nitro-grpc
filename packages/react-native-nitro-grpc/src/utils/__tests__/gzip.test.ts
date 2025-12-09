@@ -1,4 +1,4 @@
-import { gzip, ungzip } from '../gzipUtils';
+import { gzip, ungzip } from '../gzip';
 
 // Mock NitroModules before importing the util
 const mockGzip = (data: ArrayBuffer): ArrayBuffer => {

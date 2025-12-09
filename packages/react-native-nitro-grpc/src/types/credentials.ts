@@ -103,7 +103,7 @@ export interface GrpcCallCredentials {
    * Function that adds authentication metadata to the call.
    */
   readonly applyMetadata: (
-    metadata: import('./GrpcMetadata').GrpcMetadata
+    metadata: import('./metadata').GrpcMetadata
   ) => void | Promise<void>;
 }
 
@@ -119,7 +119,7 @@ export class CallCredentials {
    */
   static createFromMetadata(
     metadataGenerator: (
-      metadata: import('./GrpcMetadata').GrpcMetadata
+      metadata: import('./metadata').GrpcMetadata
     ) => void | Promise<void>
   ): GrpcCallCredentials {
     return {

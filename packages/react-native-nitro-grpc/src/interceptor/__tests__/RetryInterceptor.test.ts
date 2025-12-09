@@ -1,7 +1,7 @@
-import { RetryInterceptor } from '../RetryInterceptor';
-import { GrpcStatus } from '../../types/GrpcStatus';
 import { GrpcError } from '../../types/GrpcError';
-import { GrpcMetadata } from '../../types/GrpcMetadata';
+import { GrpcStatus } from '../../types/GrpcStatus';
+import { GrpcMetadata } from '../../types/metadata';
+import { RetryInterceptor } from '../retry';
 
 // Mock setTimeout
 jest.useFakeTimers();

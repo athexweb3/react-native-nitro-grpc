@@ -1,4 +1,4 @@
-import type { GrpcCallOptions } from './GrpcCallOptions';
+import type { GrpcCallOptions } from '../types/callOptions';
 
 /**
  * Next function for unary interceptors.

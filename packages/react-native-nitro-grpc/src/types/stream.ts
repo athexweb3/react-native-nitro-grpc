@@ -1,7 +1,7 @@
 import { EventEmitter } from 'eventemitter3';
-import type { GrpcMetadata } from '../types/GrpcMetadata';
-import type { StatusObject } from '../types/ChannelTypes';
-import type { GrpcError } from '../types/GrpcError';
+import type { StatusObject } from './ChannelTypes';
+import type { GrpcError } from './GrpcError';
+import type { GrpcMetadata } from './metadata';
 
 /**
  * Base class for all gRPC streams.

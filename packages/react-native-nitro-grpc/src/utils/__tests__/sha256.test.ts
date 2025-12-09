@@ -1,4 +1,4 @@
-import { sha256, sha256Bytes } from '../sha256Utils';
+import { sha256, sha256Bytes } from '../sha256';
 
 // Mock NitroModules before importing the util
 const mockHash = (data: string | ArrayBuffer) => {

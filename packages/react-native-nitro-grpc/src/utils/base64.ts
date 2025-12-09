@@ -1,8 +1,6 @@
-// Native C++ implementation via Nitro Modules
 import { NitroModules } from 'react-native-nitro-modules';
 import type { Base64 } from '../specs/Base64.nitro';
 
-// Load the Hybrid Object
 const HybridBase64 = NitroModules.createHybridObject<Base64>('Base64');
 
 /**
