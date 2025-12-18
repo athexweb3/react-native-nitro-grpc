@@ -12,6 +12,15 @@
 *   **HTTP/2 & Multiplexing**: One TCP connection for all requests with header compression (HPACK).
 *   **True Bi-directional Streaming**: Real-time data flow for chat, trading, and voice apps without WebSockets.
 *   **Type Safety**: strict TypeScript definitions generated directly from your `.proto` files.
+ 
+ ## 📦 Android Prefab
+ 
+ > **Note:** Generally you don't need to touch this, but if you are looking for the standalone gRPC C++ for Android:
+ 
+ [![](https://jitpack.io/v/athexweb3/react-native-nitro-grpc.svg)](https://jitpack.io/#athexweb3/react-native-nitro-grpc)
+ 
+ We provide a prebuilt **gRPC Android Prefab** package to speed up build times. It hosts the precompiled static libraries for gRPC Core.
+ Check out [packages/grpc-android-prefab](packages/grpc-android-prefab) for more details.
 
 ## Installation
 

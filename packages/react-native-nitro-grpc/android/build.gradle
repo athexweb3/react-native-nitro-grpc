@@ -118,6 +118,7 @@ android {
 repositories {
   mavenCentral()
   google()
+  maven { url 'https://jitpack.io' }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
@@ -130,5 +131,6 @@ dependencies {
   implementation 'io.grpc:grpc-protobuf-lite:1.61.1'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation project(":react-native-nitro-modules")
-  implementation project(':grpc-android-prefab')
+  implementation project(':grpc-android-prefab')  // JitPack has Prefab compatibility issue - investigating
+  // implementation 'com.github.athexweb3:react-native-nitro-grpc:prefab-v1.62.0'
 }
