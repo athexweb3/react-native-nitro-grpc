@@ -1,11 +1,15 @@
 {
-  "cxxNamespace": ["grpc"],
+  "cxxNamespace": [
+    "grpc"
+  ],
   "source": "src",
   "ios": {
     "iosModuleName": "RNGrpc"
   },
   "android": {
-    "androidNamespace": ["grpc"],
+    "androidNamespace": [
+      "grpc"
+    ],
     "androidCxxLibName": "grpc"
   },
   "autolinking": {
@@ -16,5 +20,7 @@
       "cpp": "HybridGrpcStream"
     }
   },
-  "ignorePaths": ["node_modules"]
+  "ignorePaths": [
+    "node_modules"
+  ]
 }

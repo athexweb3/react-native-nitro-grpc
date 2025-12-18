@@ -38,7 +38,7 @@
     "eslint-plugin-react-native": "^4.1.0",
     "husky": "^9.0.11",
     "lint-staged": "^16.2.7",
-    "nitro-codegen": "^0.29.4",
+    "nitrogen": "^0.31.10",
     "prettier": "^3.2.5",
     "release-it": "^17.1.1",
     "typescript": "^5.4.2",
