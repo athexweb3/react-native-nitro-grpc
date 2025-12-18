@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "react-native-nitro-grpc"
+include ':grpc-android-prefab'
+project(':grpc-android-prefab').projectDir = new File(rootProject.projectDir, 'packages/grpc-android-prefab')

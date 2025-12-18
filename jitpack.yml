@@ -1,0 +1,4 @@
+jdk:
+  - openjdk17
+install:
+  - ./gradlew :grpc-android-prefab:assembleRelease :grpc-android-prefab:publishToMavenLocal
