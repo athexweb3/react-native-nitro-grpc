@@ -27,13 +27,8 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-
-      - name: Generate and Publish AAR
-        working-directory: example/android
-        run: ./gradlew :grpc-android-prefab:publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
+      - name: Build AAR
+        run: ./gradlew :grpc-android-prefab:assembleRelease
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
