@@ -49,5 +49,15 @@ afterEvaluate {
                 version = '1.62.0'
             }
         }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/athexweb3/react-native-nitro-grpc")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR") ?: "athexweb3"
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
     }
 }

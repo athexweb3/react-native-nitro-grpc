@@ -30,6 +30,13 @@ jobs:
       - name: Build packages
         run: bun turbo run build
 
+      - name: Generate and Publish AAR
+        working-directory: example/android
+        run: ./gradlew :grpc-android-prefab:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
