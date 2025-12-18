@@ -39,5 +39,8 @@ Pod::Spec.new do |s|
   load 'nitrogen/generated/ios/RNGrpc+autolinking.rb'
   add_nitrogen_files(s)
 
+  load 'scripts/setup-grpc.rb'
+  setup_grpc(s)
+
   install_modules_dependencies(s)
 end
