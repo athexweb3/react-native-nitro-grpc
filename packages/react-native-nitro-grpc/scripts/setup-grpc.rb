@@ -1,14 +1,69 @@
-# Using a ruby module to namespace the fix
-module RNGrpc
-  # Call this in your Podfile `target` block:
-  #   RNGrpc.install_dependencies(self)
-  def self.install_dependencies(podfile)
+# Call this method in your Podfile 'target' block to install dependencies:
+#   setup_grpc(self)
+#
+# And call it in your 'post_install' block to fix build issues:
+#   setup_grpc(installer)
+#
+def setup_grpc(spec)
+  # Check if we are in a Podspec (adding dependencies)
+  if spec.respond_to?(:dependency)
+    Pod::UI.puts "Adding gRPC dependencies to #{spec.name} spec...".green
+    # Standard spec dependencies (for headers/linking)
+    spec.dependency 'gRPC-C++'
+    spec.dependency 'gRPC-Core'
+
+    begin
+      # Try to inject 'modular_headers => true' into the Podfile
+      if defined?(Pod::Config) && Pod::Config.instance && Pod::Config.instance.podfile
+        podfile = Pod::Config.instance.podfile
+        valid_targets = podfile.target_definitions.values.reject { |t| t.name == 'Pods' }
+        
+        valid_targets.each do |target|
+          # Only inject if not already present to avoid duplication
+          unless target.dependencies.any? { |d| d.name == 'gRPC-C++' }
+             Pod::UI.puts "Injecting 'gRPC-C++' (modular) into Podfile target '#{target.name}'...".green
+             target.store_pod('gRPC-C++', :modular_headers => true)
+          end
+          unless target.dependencies.any? { |d| d.name == 'gRPC-Core' }
+             Pod::UI.puts "Injecting 'gRPC-Core' (modular) into Podfile target '#{target.name}'...".green
+             target.store_pod('gRPC-Core', :modular_headers => true)
+          end
+        end
+   
+        # Inject post_install hook
+        previous_post_install = podfile.instance_variable_get(:@post_install_callback)
+        
+        new_post_install = Proc.new do |installer|
+           # Run previous hook if it existed
+           previous_post_install.call(installer) if previous_post_install
+           
+           # Run our hook
+           setup_grpc(installer)
+        end
+        
+        podfile.instance_variable_set(:@post_install_callback, new_post_install)
+        Pod::UI.puts "Injected 'setup_grpc' into Podfile post_install hook!".green
+      end
+    rescue => e
+      Pod::UI.puts "Warning: Failed to inject gRPC dependencies/hooks into Podfile: #{e.message}".yellow
+      Pod::UI.puts e.backtrace.join("\n").yellow if Pod::Config.instance.verbose?
+    end
+
+    return
+  end
+ 
+
+  # Check if we are in the 'pod' definition phase (dependencies in Podfile)
+  if spec.respond_to?(:pod)
     Pod::UI.puts "Installing gRPC dependencies with modular headers...".green
-    podfile.pod 'gRPC-C++', :modular_headers => true
-    podfile.pod 'gRPC-Core', :modular_headers => true
+    spec.pod 'gRPC-C++', :modular_headers => true
+    spec.pod 'gRPC-Core', :modular_headers => true
+    return
   end
 
-  def self.post_install(installer)
+  # Check if we are in the 'post_install' phase (installer)
+  if spec.respond_to?(:pods_project)
+    installer = spec
     log_file = '/tmp/grpc_debug.txt'
     File.open(log_file, 'w') { |f| f.puts "Starting post_install..." }
 
@@ -22,12 +77,13 @@ module RNGrpc
     end
 
     src_map = File.join(installer.sandbox.root, 'gRPC-Core/include/grpc/module.modulemap')
-    File.open(log_file, 'a') { |f| f.puts "Debug: Checking source map at #{src_map}" }
-
-    if File.exist?(src_map)
-       File.open(log_file, 'a') { |f| f.puts "Debug: Source map found!" }
-    else
-       File.open(log_file, 'a') { |f| f.puts "Debug: Source map NOT found!" }
+    File.open(log_file, 'a') do |f|
+       f.puts "Debug: Checking source map at #{src_map}"
+       if File.exist?(src_map)
+         f.puts "Debug: Source map found!"
+       else
+         f.puts "Debug: Source map NOT found!"
+       end
     end
 
     installer.pods_project.targets.each do |target|
@@ -56,47 +112,7 @@ module RNGrpc
             # The Pods-generated xcconfig adds -fmodule-map-file to the broken Private Headers path.
             # We must redirect it to the actual source module map.
             cflags = config.build_settings['OTHER_CFLAGS'] || '$(inherited)'
-
-            # Replace the private path with the source path
-            # We use specific string replacement to be safe
             src_module_map = '$(PODS_ROOT)/gRPC-Core/include/grpc/module.modulemap'
-
-            # Note: The original flag is likely added by CocoaPods automatically, so it might not be in build_settings yet?
-            # Actually, CocoaPods populates build_settings from podspecs.
-            # If it's not here, we might need to append a removal or just set it explicitly?
-            # But the 'cat' showed it in the file.
-
-            # Let's forcefully append the CORRECT flag. Clang usually takes the last one?
-            # Or better, we define it ourselves to override?
-
-            # If we simply append the correct path, clang might still complain about the missing first one.
-            # We need to REMOVE the bad one if possible, but we don't see it here easily if it's inherited or injected later.
-
-            # However, post_install runs before writing.
-            # If we explicitly SET 'OTHER_CFLAGS' to include the correct map,
-            # does it override the auto-generated one?
-
-            # Let's try appending the correct one AND the -fmodule-map-file argument.
-            # But if the error is "file not found" for the FIRST argument, appending won't help.
-
-            # The flag in xcconfig was: -fmodule-map-file="${PODS_ROOT}/Headers/Private/grpc/gRPC-Core.modulemap"
-
-            # We can try to manipulate the 'pod_target_xcconfig' of the dependency? No, that's read-only here.
-
-            # Let's act on the generated xcconfig content directly? NO, that's ugly.
-
-            # Strategy: We essentially can't easily remove the flag if CocoaPods adds it during generation *after* this hook.
-            # BUT, we can try to create the file at that location PERMANENTLY?
-            # Or... wait. If CocoaPods adds it, surely it thinks the file is there.
-
-            # Why does the file disappear?
-            # Maybe we should try to fix the symlink issue again?
-            # If I make the directory read-only? No.
-
-            # Re-read: "OTHER_CFLAGS = $(inherited) -fmodule-map-file=..."
-            # This is in the generated xcconfig.
-            # Does config.build_settings contain it?
-            # Debug log it.
 
              if cflags.is_a?(String) && cflags.include?('gRPC-Core.modulemap')
                  config.build_settings['OTHER_CFLAGS'] = cflags.gsub(
@@ -114,17 +130,14 @@ module RNGrpc
       # Method 2: Patch the generated xcconfig files directly for ALL targets
       # This is necessary because CocoaPods might have already generated the file with the bad flag
       # and Project build settings just inherit it.
-      # We need to patch not just gRPC targets but also aggregation targets like Pods-GrpcExample
       xcconfig_dir = File.join(installer.sandbox.root, "Target Support Files/#{target.name}")
       Dir.glob("#{xcconfig_dir}/*.xcconfig").each do |xcconfig_path|
          if File.exist?(xcconfig_path)
             content = File.read(xcconfig_path)
             # Replace Private Headers path with Source path for module map
-            # Handle multiple variants of the broken path
             if content.include?('Headers/Private/grpc/gRPC-Core.modulemap')
                Pod::UI.puts "Patching xcconfig: #{target.name}/#{File.basename(xcconfig_path)}".green
 
-               # Replace all variants we might encounter
                new_content = content
                  .gsub("\"${PODS_ROOT}/Headers/Private/grpc/gRPC-Core.modulemap\"", "\"$(PODS_ROOT)/gRPC-Core/include/grpc/module.modulemap\"")
                  .gsub('${PODS_ROOT}/Headers/Private/grpc/gRPC-Core.modulemap', '$(PODS_ROOT)/gRPC-Core/include/grpc/module.modulemap')
@@ -159,6 +172,9 @@ module RNGrpc
         Pod::UI.puts "Added gRPC module map symlink script to #{target.name}".green
       end
     end
-
+    return
   end
+  
+  # If spec doesn't match expected types
+  Pod::UI.puts "Warning: setup_grpc called with unrecognized spec: #{spec.class}".orange
 end

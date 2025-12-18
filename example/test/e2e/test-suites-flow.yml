@@ -1,5 +1,0 @@
-appId: ${PLATFORM == 'ios' ? 'grpc.example' : 'grpc.example'}
----
-- launchApp
-- assertVisible: "Test Suites"
-- tapOn: "Test Suites"
