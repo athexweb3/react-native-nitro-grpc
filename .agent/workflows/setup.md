@@ -17,7 +17,7 @@ bun pods
 3. Generate Nitro Bindings
 // turbo
 ```bash
-bun nitro-codegen
+bun nitrogen
 ```
 
 4. Verify C++ Setup

@@ -1,3 +1,0 @@
-# Config for Maestro
-flows:
-  - test/e2e/test-suites-flow.yml

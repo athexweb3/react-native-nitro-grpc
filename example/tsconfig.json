@@ -1,15 +1,17 @@
 {
-    "extends": "@react-native/typescript-config/tsconfig.json",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "react-native-nitro-grpc": [
-                "../packages/react-native-nitro-grpc/src/index"
-            ]
-        }
-    },
-    "include": [
-        ".",
-        "../packages/react-native-nitro-grpc/src"
-    ]
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }
