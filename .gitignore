@@ -170,3 +170,6 @@ tsconfig.tsbuildinfo
 # Allow agent configuration
 !.agent
 !.agent/**
+
+# gRPC Source
+packages/grpc-android-prefab/grpc/

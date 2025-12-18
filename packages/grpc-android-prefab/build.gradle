@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+// plugins {
+//     id 'com.android.library'
+//     // id 'maven-publish'
+// }
+
+android {
+    namespace 'com.athex.grpc'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 24
+    }
+
+    buildFeatures {
+        // We manually package prefab, so disable auto-publishing to avoid conflicts/empty dirs
+        prefabPublishing false
+    }
+
+    // Manually include src/main/prefab into the AAR root 'prefab' folder
+    libraryVariants.all { variant ->
+        variant.packageLibraryProvider.configure {
+            from("src/main/prefab") {
+                into("prefab")
+            }
+        }
+    }
+    
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+// Prefab requires libraries to be in specific folders. 
+// We will manually map them later or refine this script.
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.athex'
+                artifactId = 'grpc-android'
+                version = '1.62.0'
+            }
+        }
+    }
+}
