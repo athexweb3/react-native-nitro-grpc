@@ -37,3 +37,6 @@ expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
+
+include ':grpc-android-prefab'
+project(':grpc-android-prefab').projectDir = new File(rootProject.projectDir, '../../packages/grpc-android-prefab')
