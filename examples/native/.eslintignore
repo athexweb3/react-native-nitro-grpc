@@ -1,5 +1,4 @@
 *.config.js
 .eslintrc.js
-web-build/
 dist/
 node_modules/

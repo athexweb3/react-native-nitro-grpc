@@ -9,7 +9,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "lint:fix": "eslint \"**/*.{js,ts,tsx}\" --fix",
+    "lint:fix": "expo lint --fix",
     "format:fix": "prettier --write \"**/*.{js,ts,tsx}\""
   },
   "dependencies": {
@@ -50,6 +50,10 @@
     "chai": "^6.2.1",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
     "typescript": "~5.9.2"
   },
   "private": true
