@@ -46,8 +46,21 @@ export interface GrpcClient
     method: string,
     request: ArrayBuffer,
     metadataJson: string,
-    deadlineMs: number
+    deadlineMs: number,
+    callId: string
   ): Promise<ArrayBuffer>;
+
+  /**
+   * Cancels a specific call.
+   * @param callId The unique ID of the call to cancel
+   */
+  cancelCall(callId: string): void;
+  unaryCallSync(
+    method: string,
+    request: ArrayBuffer,
+    metadata: string,
+    deadline: number
+  ): ArrayBuffer;
 
   /**
    * Creates a server streaming call.

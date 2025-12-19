@@ -4,6 +4,7 @@ import { GrpcError } from '../types/GrpcError';
 import { GrpcStatus } from '../types/GrpcStatus';
 import { GrpcMetadata } from '../types/metadata';
 import { BidiStream, ClientStream, ServerStream } from '../types/stream';
+import { serializeMessage, deserializeMessage } from '../utils/serialization';
 
 /**
  * Server streaming implementation (read-only).
@@ -11,20 +12,15 @@ import { BidiStream, ClientStream, ServerStream } from '../types/stream';
  */
 export class ServerStreamImpl<Res> extends ServerStream<Res> {
   private _hybrid: HybridGrpcStream;
-  private _client: { _deserializeMessage<T>(buffer: ArrayBuffer): T };
 
-  constructor(
-    hybridStream: HybridGrpcStream,
-    client: { _deserializeMessage<T>(buffer: ArrayBuffer): T }
-  ) {
+  constructor(hybridStream: HybridGrpcStream) {
     super();
     this._hybrid = hybridStream;
-    this._client = client;
 
     // Wire up hybrid callbacks to event emitters
     this._hybrid.onData((data: ArrayBuffer) => {
       try {
-        const message = this._client._deserializeMessage<Res>(data);
+        const message = deserializeMessage<Res>(data);
         this.emit('data', message);
       } catch (error) {
         this.emit('error', this._wrapError(error));
@@ -92,24 +88,13 @@ export class ServerStreamImpl<Res> extends ServerStream<Res> {
  */
 export class ClientStreamImpl<Req, Res> extends ClientStream<Req, Res> {
   private _hybrid: HybridGrpcStream;
-  private _client: {
-    _serializeMessage<T>(message: T): ArrayBuffer;
-    _deserializeMessage<T>(buffer: ArrayBuffer): T;
-  };
   private _responsePromise: Promise<Res>;
   private _resolveResponse!: (value: Res) => void;
   private _rejectResponse!: (error: Error) => void;
 
-  constructor(
-    hybridStream: HybridGrpcStream,
-    client: {
-      _serializeMessage<T>(message: T): ArrayBuffer;
-      _deserializeMessage<T>(buffer: ArrayBuffer): T;
-    }
-  ) {
+  constructor(hybridStream: HybridGrpcStream) {
     super();
     this._hybrid = hybridStream;
-    this._client = client;
 
     // Create response promise
     this._responsePromise = new Promise<Res>((resolve, reject) => {
@@ -120,7 +105,7 @@ export class ClientStreamImpl<Req, Res> extends ClientStream<Req, Res> {
     // Wire up callbacks
     this._hybrid.onData((data: ArrayBuffer) => {
       try {
-        const message = this._client._deserializeMessage<Res>(data);
+        const message = deserializeMessage<Res>(data);
         this._resolveResponse(message);
       } catch (error) {
         this._rejectResponse(this._wrapError(error));
@@ -161,7 +146,7 @@ export class ClientStreamImpl<Req, Res> extends ClientStream<Req, Res> {
 
   write(data: Req): boolean {
     try {
-      const buffer = this._client._serializeMessage(data);
+      const buffer = serializeMessage(data);
       this._hybrid.write(buffer);
       return true; // TODO: Implement backpressure
     } catch (error) {
@@ -205,26 +190,15 @@ export class ClientStreamImpl<Req, Res> extends ClientStream<Req, Res> {
  */
 export class BidiStreamImpl<Req, Res> extends BidiStream<Req, Res> {
   private _hybrid: HybridGrpcStream;
-  private _client: {
-    _serializeMessage<T>(message: T): ArrayBuffer;
-    _deserializeMessage<T>(buffer: ArrayBuffer): T;
-  };
 
-  constructor(
-    hybridStream: HybridGrpcStream,
-    client: {
-      _serializeMessage<T>(message: T): ArrayBuffer;
-      _deserializeMessage<T>(buffer: ArrayBuffer): T;
-    }
-  ) {
+  constructor(hybridStream: HybridGrpcStream) {
     super();
     this._hybrid = hybridStream;
-    this._client = client;
 
     // Wire up hybrid callbacks
     this._hybrid.onData((data: ArrayBuffer) => {
       try {
-        const message = this._client._deserializeMessage<Res>(data);
+        const message = deserializeMessage<Res>(data);
         this.emit('data', message);
       } catch (error) {
         this.emit('error', this._wrapError(error));
@@ -266,7 +240,7 @@ export class BidiStreamImpl<Req, Res> extends BidiStream<Req, Res> {
 
   write(data: Req): boolean {
     try {
-      const buffer = this._client._serializeMessage(data);
+      const buffer = serializeMessage(data);
       this._hybrid.write(buffer);
       return true; // TODO: Implement backpressure
     } catch (error) {

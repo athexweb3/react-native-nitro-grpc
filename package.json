@@ -4,7 +4,7 @@
   "source": "packages/react-native-nitro-grpc/src",
   "workspaces": [
     "packages/react-native-nitro-grpc",
-    "example"
+    "examples/*"
   ],
   "description": "High-performance gRPC for React Native powered by C++ and Nitro Modules.",
   "scripts": {
@@ -12,7 +12,7 @@
     "clean": "bun --filter='*' clean",
     "clean:deep": "bun --filter='*' clean:deep && del-cli node_modules",
     "pods": "bun --filter='react-native-nitro-grpc-example' pods",
-    "start": "bun --cwd example start",
+    "start": "bun --cwd examples/native start",
     "tsc": "bun --filter='*' typescript",
     "lint": "bun --filter='*' lint",
     "lint:fix": "bun --filter='*' lint:fix",
@@ -41,7 +41,7 @@
     "nitrogen": "^0.31.10",
     "prettier": "^3.2.5",
     "release-it": "^17.1.1",
-    "typescript": "^5.4.2",
+    "typescript": "^5.9.2",
     "typescript-eslint": "^7.0.0"
   },
   "release-it": {
@@ -57,7 +57,7 @@
       "release": true
     },
     "hooks": {
-      "before:release": "bun bundle-install && bun pods && git add example/ios/Podfile.lock"
+      "before:release": "bun bundle-install && bun pods && git add examples/native/ios/Podfile.lock"
     },
     "plugins": {
       "@release-it/conventional-changelog": {

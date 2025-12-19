@@ -1,12 +1,11 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import { BidiStreamImpl, ClientStreamImpl, ServerStreamImpl } from '../stream';
 import type { GrpcCallOptions } from '../types/callOptions';
-import { GrpcError } from '../types/GrpcError';
-import { GrpcStatus } from '../types/GrpcStatus';
-import { GrpcMetadata } from '../types/metadata';
 import type { BidiStream, ClientStream, ServerStream } from '../types/stream';
 import type { GrpcChannel } from './channel';
+import { unaryCall, unaryCallSync } from '../calls/unary';
+import { serverStream, clientStream, bidiStream } from '../calls/streaming';
+import type { MethodDefinition } from '../types/method';
 
 /**
  * gRPC client for making calls to a server.
@@ -98,46 +97,33 @@ export class GrpcClient {
    * ```
    */
   public async unaryCall<Req, Res>(
-    method: string,
+    method: string | MethodDefinition<Req, Res>,
     request: Req,
     options?: GrpcCallOptions
   ): Promise<Res> {
-    try {
-      return await this._applyUnaryInterceptors(
-        method,
-        request,
-        options,
-        async (m, r, o) => {
-          // Serialize request to ArrayBuffer
-          const requestBuffer = this._serializeMessage(r);
+    return unaryCall(
+      this._hybrid,
+      method,
+      request,
+      options,
+      this._interceptors
+    );
+  }
 
-          // Prepare metadata and deadline
-          const metadata = o?.metadata || new GrpcMetadata();
-          const metadataJson = JSON.stringify(metadata.toJSON());
-          const deadlineMs = this._calculateDeadline(o?.deadline);
-
-          // Handle AbortSignal
-          if (o?.signal) {
-            this._checkAborted(o.signal);
-            // TODO: Implement cancellation when signal aborts
-          }
-
-          // Make the call
-          const responseBuffer = await this._hybrid.unaryCall(
-            m,
-            requestBuffer,
-            metadataJson,
-            deadlineMs
-          );
-
-          // Deserialize response
-          return this._deserializeMessage<Res>(responseBuffer);
-        }
-      );
-    } catch (error) {
-      console.error(`[GrpcClient] Unary call failed: ${method}`, error);
-      throw error;
-    }
+  /**
+   * Makes a synchronous unary call.
+   *
+   * @param method - Full method name
+   * @param request - Request message
+   * @param options - Optional call configuration
+   * @returns Response message
+   */
+  public unaryCallSync<Req, Res>(
+    method: string | MethodDefinition<Req, Res>,
+    request: Req,
+    options?: GrpcCallOptions
+  ): Res {
+    return unaryCallSync(this._hybrid, method, request, options);
   }
 
   /**
@@ -165,19 +151,7 @@ export class GrpcClient {
     request: Req,
     options?: GrpcCallOptions
   ): ServerStream<Res> {
-    const requestBuffer = this._serializeMessage(request);
-    const metadata = options?.metadata || new GrpcMetadata();
-    const metadataJson = JSON.stringify(metadata.toJSON());
-    const deadlineMs = this._calculateDeadline(options?.deadline);
-
-    const hybridStream = this._hybrid.createServerStream(
-      method,
-      requestBuffer,
-      metadataJson,
-      deadlineMs
-    );
-
-    return new ServerStreamImpl<Res>(hybridStream, this);
+    return serverStream(this._hybrid, method, request, options);
   }
 
   /**
@@ -205,17 +179,7 @@ export class GrpcClient {
     method: string,
     options?: GrpcCallOptions
   ): ClientStream<Req, Res> {
-    const metadata = options?.metadata || new GrpcMetadata();
-    const metadataJson = JSON.stringify(metadata.toJSON());
-    const deadlineMs = this._calculateDeadline(options?.deadline);
-
-    const hybridStream = this._hybrid.createClientStream(
-      method,
-      metadataJson,
-      deadlineMs
-    );
-
-    return new ClientStreamImpl<Req, Res>(hybridStream, this);
+    return clientStream(this._hybrid, method, options);
   }
 
   /**
@@ -243,111 +207,6 @@ export class GrpcClient {
     method: string,
     options?: GrpcCallOptions
   ): BidiStream<Req, Res> {
-    const metadata = options?.metadata || new GrpcMetadata();
-    const metadataJson = JSON.stringify(metadata.toJSON());
-    const deadlineMs = this._calculateDeadline(options?.deadline);
-
-    const hybridStream = this._hybrid.createBidiStream(
-      method,
-      metadataJson,
-      deadlineMs
-    );
-
-    return new BidiStreamImpl<Req, Res>(hybridStream, this);
-  }
-
-  // ==================== Internal Helper Methods ====================
-
-  /**
-   * Serializes a message to ArrayBuffer.
-   * @internal
-   */
-  _serializeMessage<T>(message: T): ArrayBuffer {
-    // TODO: Implement proper protobuf serialization
-    // For now, use JSON as placeholder
-    if (message instanceof Uint8Array) {
-      return message.buffer as ArrayBuffer;
-    }
-    const json = JSON.stringify(message);
-    const encoder = new TextEncoder();
-    return encoder.encode(json).buffer as ArrayBuffer;
-  }
-
-  /**
-   * Deserializes a message from ArrayBuffer.
-   * @internal
-   */
-  _deserializeMessage<T>(buffer: ArrayBuffer): T {
-    // TODO: Implement proper protobuf deserialization
-    // For now, use JSON as placeholder
-    const decoder = new TextDecoder();
-    const json = decoder.decode(buffer);
-    return JSON.parse(json) as T;
-  }
-
-  /**
-   * Calculates deadline in milliseconds from options.
-   * @internal
-   */
-  private _calculateDeadline(deadline?: Date | number): number {
-    if (!deadline) {
-      return 0; // No deadline
-    }
-    if (typeof deadline === 'number') {
-      return Date.now() + deadline;
-    }
-    return deadline.getTime();
-  }
-
-  /**
-   * Checks if an AbortSignal has been aborted.
-   * @internal
-   */
-  private _checkAborted(signal: AbortSignal): void {
-    if (signal.aborted) {
-      throw new GrpcError(
-        GrpcStatus.CANCELLED,
-        'Call cancelled via AbortSignal'
-      );
-    }
-  }
-
-  /**
-   * Applies unary interceptors to the call.
-   * @internal
-   */
-  private async _applyUnaryInterceptors<Req, Res>(
-    method: string,
-    request: Req,
-    options: GrpcCallOptions | undefined,
-    finalCall: (m: string, r: Req, o: GrpcCallOptions) => Promise<Res>
-  ): Promise<Res> {
-    const interceptors = this._interceptors
-      .map((i) => i.unary)
-      .filter(
-        (i): i is import('../types/interceptor').UnaryInterceptor =>
-          i !== undefined
-      );
-
-    if (interceptors.length === 0) {
-      return finalCall(method, request, options || {});
-    }
-
-    let index = 0;
-    const next = async (m: string, r: unknown, o: GrpcCallOptions) => {
-      if (index >= interceptors.length) {
-        return finalCall(m, r as Req, o);
-      }
-      const interceptor = interceptors[index++];
-
-      return interceptor!(
-        m,
-        r,
-        o,
-        next as unknown as import('../types/interceptor').NextUnaryFn
-      );
-    };
-
-    return next(method, request, options || {}) as Promise<Res>;
+    return bidiStream(this._hybrid, method, options);
   }
 }
