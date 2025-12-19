@@ -17,6 +17,8 @@ class HybridGrpcClient : public HybridGrpcClientSpec {
 
   // Channel management
   void connect(const std::string& target, const std::string& credentialsJson, const std::string& optionsJson) override;
+  void connectWithCallCredentials(const std::string& target, const std::string& credentialsJson, const std::string& optionsJson,
+                                  const std::string& callCredentialsJson) override; // NEW: With call credentials
 
   void close() override;
 

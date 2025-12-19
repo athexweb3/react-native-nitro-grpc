@@ -1,8 +1,11 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
 import type { ChannelOptions, ChannelState } from '../types/channel-types';
-import type { GrpcChannelCredentials } from '../types/credentials';
-import { ChannelCredentials } from '../types/credentials';
+import type {
+  GrpcChannelCredentials,
+  TypedCallCredentials,
+} from '../types/credentials';
+import { ChannelCredentials, CallCredentials } from '../types/credentials';
 
 /**
  * Represents a gRPC channel - a connection to a specific server endpoint.
@@ -34,11 +37,13 @@ export class GrpcChannel {
    * @param target - Server address (e.g., "localhost:50051", "dns:///service.example.com")
    * @param credentials - Channel credentials (secure or insecure)
    * @param options - Optional channel configuration
+   * @param callCredentials - Optional per-RPC call credentials (OAuth2/JWT/Bearer)
    */
   constructor(
     target: string,
     credentials: GrpcChannelCredentials,
-    options?: ChannelOptions
+    options?: ChannelOptions,
+    callCredentials?: TypedCallCredentials
   ) {
     this._target = target;
     this._hybrid =
@@ -47,7 +52,20 @@ export class GrpcChannel {
     const credentialsJson = ChannelCredentials.toJSON(credentials);
     const optionsJson = options ? JSON.stringify(options) : '{}';
 
-    this._hybrid.connect(target, credentialsJson, optionsJson);
+    // Connect with call credentials if provided (for composite auth)
+    if (callCredentials) {
+      const callCredsJson = CallCredentials.toJSON(callCredentials);
+      // Call overloaded C++ method with call credentials
+      this._hybrid.connectWithCallCredentials(
+        target,
+        credentialsJson,
+        optionsJson,
+        callCredsJson
+      );
+    } else {
+      // Standard connect without call credentials
+      this._hybrid.connect(target, credentialsJson, optionsJson);
+    }
   }
 
   /**

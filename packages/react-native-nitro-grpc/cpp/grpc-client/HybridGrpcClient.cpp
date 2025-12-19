@@ -1,7 +1,9 @@
 #include "HybridGrpcClient.hpp"
+#include "../auth/CredentialsFactory.hpp" // NEW
 #include "../calls/UnaryCall.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../grpc-stream/HybridGrpcStream.hpp"
+#include "../utils/json/JsonParser.hpp" // NEW
 #include <iostream>
 #include <stdexcept>
 
@@ -13,6 +15,77 @@ void HybridGrpcClient::connect(const std::string& target, const std::string& cre
     _closed = false;
   } catch (const std::exception& e) {
     throw std::runtime_error("Failed to connect: " + std::string(e.what()));
+  }
+}
+
+// NEW: Connect with call credentials (OAuth2/JWT)
+void HybridGrpcClient::connectWithCallCredentials(const std::string& target, const std::string& credentialsJson,
+                                                  const std::string& optionsJson, const std::string& callCredentialsJson) {
+  try {
+    // Parse channel and call credentials
+    auto channelCreds = JsonParser::parseCredentials(credentialsJson);
+    auto callCreds = JsonParser::parseCallCredentials(callCredentialsJson);
+
+    // Create composite credentials based on call credentials type
+    std::shared_ptr<::grpc::ChannelCredentials> compositeCreds;
+
+    if (callCreds.type == JsonParser::CallCredentials::Type::BEARER) {
+      if (!callCreds.token.has_value()) {
+        throw std::runtime_error("Bearer token is missing");
+      }
+      compositeCreds = CredentialsFactory::createComposite(channelCreds, callCreds.token.value());
+    } else if (callCreds.type == JsonParser::CallCredentials::Type::OAUTH2) {
+      if (!callCreds.token.has_value()) {
+        throw std::runtime_error("OAuth2 access token is missing");
+      }
+      // Use CredentialsFactory to create OAuth2 composite
+      auto channel_creds = (channelCreds.type == JsonParser::Credentials::Type::INSECURE) ? ::grpc::InsecureChannelCredentials() : [&]() {
+        ::grpc::SslCredentialsOptions ssl_opts;
+        if (channelCreds.rootCerts.has_value())
+          ssl_opts.pem_root_certs = channelCreds.rootCerts.value();
+        if (channelCreds.privateKey.has_value())
+          ssl_opts.pem_private_key = channelCreds.privateKey.value();
+        if (channelCreds.certChain.has_value())
+          ssl_opts.pem_cert_chain = channelCreds.certChain.value();
+        return ::grpc::SslCredentials(ssl_opts);
+      }();
+
+      auto call_creds = CredentialsFactory::createAccessToken(callCreds.token.value());
+      compositeCreds = ::grpc::CompositeChannelCredentials(channel_creds, call_creds);
+    } else if (callCreds.type == JsonParser::CallCredentials::Type::CUSTOM) {
+      if (!callCreds.metadata.has_value()) {
+        throw std::runtime_error("Custom metadata is missing");
+      }
+      auto metadata_creds = CredentialsFactory::createCustomMetadata(callCreds.metadata.value());
+
+      auto channel_creds = (channelCreds.type == JsonParser::Credentials::Type::INSECURE) ? ::grpc::InsecureChannelCredentials() : [&]() {
+        ::grpc::SslCredentialsOptions ssl_opts;
+        if (channelCreds.rootCerts.has_value())
+          ssl_opts.pem_root_certs = channelCreds.rootCerts.value();
+        if (channelCreds.privateKey.has_value())
+          ssl_opts.pem_private_key = channelCreds.privateKey.value();
+        if (channelCreds.certChain.has_value())
+          ssl_opts.pem_cert_chain = channelCreds.certChain.value();
+        return ::grpc::SslCredentials(ssl_opts);
+      }();
+
+      compositeCreds = ::grpc::CompositeChannelCredentials(channel_creds, metadata_creds);
+    }
+
+    // Parse channel options and create channel
+    auto options = JsonParser::parseChannelOptions(optionsJson);
+    auto channelArgs = ChannelManager::createChannelArguments(options);
+
+    // Apply SSL target name override if present
+    if (channelCreds.targetNameOverride.has_value()) {
+      channelArgs.SetSslTargetNameOverride(channelCreds.targetNameOverride.value());
+    }
+
+    _channel = ::grpc::CreateCustomChannel(target, compositeCreds, channelArgs);
+    _closed = false;
+
+  } catch (const std::exception& e) {
+    throw std::runtime_error("Failed to connect with call credentials: " + std::string(e.what()));
   }
 }
 

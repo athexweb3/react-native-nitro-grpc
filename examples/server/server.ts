@@ -63,10 +63,15 @@ server.addService(myService.service, {
   },
 });
 
+import { readFileSync } from 'fs';
+
+const serverCert = readFileSync(join(__dirname, 'certs', 'server.crt'));
+const serverKey = readFileSync(join(__dirname, 'certs', 'server.key'));
+
 server.bindAsync(
   '0.0.0.0:50051',
-  grpc.ServerCredentials.createInsecure(),
+  grpc.ServerCredentials.createSsl(null, [{ cert_chain: serverCert, private_key: serverKey }]),
   () => {
-    console.log('Server running at 0.0.0.0:50051');
+    console.log('Server running properly at 0.0.0.0:50051 (Secure)');
   },
 );

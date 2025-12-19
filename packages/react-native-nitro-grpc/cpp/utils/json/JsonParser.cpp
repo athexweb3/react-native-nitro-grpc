@@ -46,6 +46,47 @@ namespace JsonParser {
     }
   }
 
+  CallCredentials parseCallCredentials(const std::string& jsonStr) {
+    try {
+      auto j = json::parse(jsonStr);
+
+      CallCredentials callCreds;
+
+      // Parse type
+      std::string typeStr = j.at("type").get<std::string>();
+      if (typeStr == "bearer") {
+        callCreds.type = CallCredentials::Type::BEARER;
+      } else if (typeStr == "oauth2") {
+        callCreds.type = CallCredentials::Type::OAUTH2;
+      } else if (typeStr == "custom") {
+        callCreds.type = CallCredentials::Type::CUSTOM;
+      } else {
+        throw std::runtime_error("Invalid call credentials type: " + typeStr);
+      }
+
+      // Parse token (for Bearer and OAuth2)
+      if (j.contains("token") && !j["token"].is_null()) {
+        callCreds.token = j["token"].get<std::string>();
+      }
+
+      // Parse metadata (for Custom)
+      if (j.contains("metadata") && j["metadata"].is_object()) {
+        std::map<std::string, std::string> metadata;
+        for (auto& [key, value] : j["metadata"].items()) {
+          if (value.is_string()) {
+            metadata[key] = value.get<std::string>();
+          }
+        }
+        callCreds.metadata = metadata;
+      }
+
+      return callCreds;
+
+    } catch (const json::exception& e) {
+      throw std::runtime_error("Failed to parse call credentials JSON: " + std::string(e.what()));
+    }
+  }
+
   std::map<std::string, std::string> parseChannelOptions(const std::string& jsonStr) {
     try {
       // Handle empty string

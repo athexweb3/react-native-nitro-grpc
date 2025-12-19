@@ -27,7 +27,6 @@ class ChannelManager {
   static std::shared_ptr<::grpc::Channel> createChannel(const std::string& target, const std::string& credentialsJson,
                                                         const std::string& optionsJson);
 
- private:
   /**
    * Create channel credentials from parsed data.
    *
@@ -43,6 +42,8 @@ class ChannelManager {
    * @return gRPC channel arguments
    */
   static ::grpc::ChannelArguments createChannelArguments(const std::map<std::string, std::string>& options);
+
+ private:
 };
 
 } // namespace margelo::nitro::grpc
