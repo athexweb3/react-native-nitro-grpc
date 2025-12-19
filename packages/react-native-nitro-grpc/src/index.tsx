@@ -1,12 +1,12 @@
 export { GrpcChannel } from './client/channel';
 export { GrpcClient } from './client/client';
-export type { GrpcCallOptions } from './types/callOptions';
+export type { GrpcCallOptions } from './types/call-options';
 
 export {
   ChannelState,
   type ChannelOptions,
   type StatusObject,
-} from './types/ChannelTypes';
+} from './types/channel-types';
 export {
   CallCredentials,
   ChannelCredentials,
@@ -15,8 +15,8 @@ export {
   type InsecureCredentials,
   type SslCredentials,
 } from './types/credentials';
-export { GrpcError } from './types/GrpcError';
-export { GrpcStatus } from './types/GrpcStatus';
+export { GrpcError } from './types/grpc-error';
+export { GrpcStatus } from './types/grpc-status';
 export { GrpcMetadata } from './types/metadata';
 
 // Stream type exports
@@ -26,7 +26,7 @@ export type { BidiStream, ClientStream, ServerStream } from './types/stream';
 export type { Metadata, MetadataValue } from './types/metadata';
 
 // Utility functions
-export * from './stream';
+export * from './streams';
 export * from './utils/base64';
 export * from './utils/gzip';
 export * from './utils/sha256';

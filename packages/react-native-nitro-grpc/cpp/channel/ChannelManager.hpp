@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../utils/json/JsonParser.hpp"
+#include "../utils/json/JsonParser.hpp"
 #include <grpcpp/grpcpp.h>
 #include <memory>
 #include <string>

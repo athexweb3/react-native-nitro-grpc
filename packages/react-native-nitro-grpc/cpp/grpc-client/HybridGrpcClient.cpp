@@ -1,6 +1,7 @@
 #include "HybridGrpcClient.hpp"
 #include "../calls/UnaryCall.hpp"
-#include "../core/channel/ChannelManager.hpp"
+#include "../channel/ChannelManager.hpp"
+#include "../grpc-stream/HybridGrpcStream.hpp"
 #include <iostream>
 #include <stdexcept>
 
@@ -103,20 +104,75 @@ void HybridGrpcClient::cancelCall(const std::string& callId) {
 std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createServerStream(const std::string& method,
                                                                            const std::shared_ptr<ArrayBuffer>& request,
                                                                            const std::string& metadataJson, double deadline) {
-  // TODO: Implement server streaming
-  throw std::runtime_error("Server streaming not yet implemented");
+  if (_closed || !_channel) {
+    throw std::runtime_error("Channel is closed");
+  }
+
+  // Create and return the stream
+  auto stream = std::make_shared<HybridGrpcStream>();
+
+  // Initialize the stream with channel and start reading
+  stream->initServerStream(_channel, method, request, metadataJson, static_cast<int64_t>(deadline), false);
+
+  return stream;
+}
+
+std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createServerStreamSync(const std::string& method,
+                                                                               const std::shared_ptr<ArrayBuffer>& request,
+                                                                               const std::string& metadataJson, double deadline) {
+  if (_closed || !_channel) {
+    throw std::runtime_error("Channel is closed");
+  }
+
+  // Sync version uses same implementation as async for now
+  // User calls readSync() in a loop instead of callbacks
+  auto stream = std::make_shared<HybridGrpcStream>();
+  stream->initServerStream(_channel, method, request, metadataJson, static_cast<int64_t>(deadline), true);
+  return stream;
+}
+
+std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createClientStreamSync(const std::string& method, const std::string& metadataJson,
+                                                                               double deadline) {
+  if (_closed || !_channel) {
+    throw std::runtime_error("Channel is closed");
+  }
+
+  auto stream = std::make_shared<HybridGrpcStream>();
+  stream->initClientStream(_channel, method, metadataJson, static_cast<int64_t>(deadline), true);
+  return stream;
+}
+
+std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createBidiStreamSync(const std::string& method, const std::string& metadataJson,
+                                                                             double deadline) {
+  if (_closed || !_channel) {
+    throw std::runtime_error("Channel is closed");
+  }
+
+  auto stream = std::make_shared<HybridGrpcStream>();
+  stream->initBidiStream(_channel, method, metadataJson, static_cast<int64_t>(deadline), true);
+  return stream;
 }
 
 std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createClientStream(const std::string& method, const std::string& metadataJson,
                                                                            double deadline) {
-  // TODO: Implement client streaming
-  throw std::runtime_error("Client streaming not yet implemented");
+  if (_closed || !_channel) {
+    throw std::runtime_error("Channel is closed");
+  }
+
+  auto stream = std::make_shared<HybridGrpcStream>();
+  stream->initClientStream(_channel, method, metadataJson, static_cast<int64_t>(deadline), false);
+  return stream;
 }
 
 std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createBidiStream(const std::string& method, const std::string& metadataJson,
                                                                          double deadline) {
-  // TODO: Implement bidirectional streaming
-  throw std::runtime_error("Bidirectional streaming not yet implemented");
+  if (_closed || !_channel) {
+    throw std::runtime_error("Channel is closed");
+  }
+
+  auto stream = std::make_shared<HybridGrpcStream>();
+  stream->initBidiStream(_channel, method, metadataJson, static_cast<int64_t>(deadline), false);
+  return stream;
 }
 
 } // namespace margelo::nitro::grpc

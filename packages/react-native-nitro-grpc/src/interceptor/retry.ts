@@ -1,12 +1,12 @@
-import type { GrpcCallOptions } from '../types/callOptions';
-import { GrpcError } from '../types/GrpcError';
-import { GrpcStatus } from '../types/GrpcStatus';
+import type { GrpcCallOptions } from '../types/call-options';
+import { GrpcError } from '../types/grpc-error';
+import { GrpcStatus } from '../types/grpc-status';
 import type {
   GrpcInterceptor,
   NextUnaryFn,
   UnaryInterceptor,
 } from '../types/interceptor';
-import type { RetryInterceptorOptions } from '../types/RetryInterceptorOptions';
+import type { RetryInterceptorOptions } from '../types/retry-interceptor-options';
 
 /**
  * An interceptor that automatically retries failed calls based on a policy.

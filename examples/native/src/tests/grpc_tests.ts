@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai';
 import { GrpcClient } from 'react-native-nitro-grpc';
 
 export const grpc_tests = {
   'stub test: module exists': () => {
-    expect(GrpcClient).to.not.be.undefined;
+    expect(GrpcClient).to.not.equal(undefined);
   },
   'stub test: has function stub': () => {
     // This is just a placeholder until we have real methods

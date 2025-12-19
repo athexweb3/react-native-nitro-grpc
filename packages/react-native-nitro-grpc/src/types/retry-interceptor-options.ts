@@ -1,4 +1,4 @@
-import type { GrpcStatus } from './GrpcStatus';
+import type { GrpcStatus } from './grpc-status';
 
 /**
  * Configuration options for the RetryInterceptor.

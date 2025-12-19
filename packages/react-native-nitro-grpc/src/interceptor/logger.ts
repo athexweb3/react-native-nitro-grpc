@@ -1,4 +1,4 @@
-import type { GrpcCallOptions } from '../types/callOptions';
+import type { GrpcCallOptions } from '../types/call-options';
 import type {
   GrpcInterceptor,
   NextUnaryFn,
@@ -8,7 +8,7 @@ import type {
   Logger,
   LoggingInterceptorOptions,
   LogLevel,
-} from '../types/LoggingInterceptorOptions';
+} from '../types/logging-interceptor-options';
 import { GrpcMetadata } from '../types/metadata';
 
 /**

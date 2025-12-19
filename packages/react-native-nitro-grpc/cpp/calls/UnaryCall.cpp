@@ -1,6 +1,6 @@
 #include "UnaryCall.hpp"
-#include "../core/CompletionQueueManager.hpp"
-#include "../core/metadata/MetadataConverter.hpp"
+#include "../completion-queue/CompletionQueueManager.hpp"
+#include "../metadata/MetadataConverter.hpp"
 #include "../utils/error/ErrorHandler.hpp"
 #include <chrono>
 #include <cstdio>
@@ -37,7 +37,6 @@ void UnaryCall::execute(std::shared_ptr<::grpc::Channel> channel, const std::str
 
   // DIAGNOSTIC CHECKS (Keep them!)
   size_t size = request->size();
-  uint8_t* checkPtr = (uint8_t*)requestData.data();
   if (size != 11) {
     // For now we skip check or keep it, up to user
   }

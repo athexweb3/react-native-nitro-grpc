@@ -1,5 +1,5 @@
 #include "ErrorHandler.hpp"
-#include "../../core/metadata/MetadataConverter.hpp"
+#include "../../metadata/MetadataConverter.hpp"
 
 namespace margelo::nitro::grpc {
 namespace ErrorHandler {

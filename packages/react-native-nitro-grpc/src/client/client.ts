@@ -1,11 +1,23 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { GrpcCallOptions } from '../types/callOptions';
+import type { GrpcCallOptions } from '../types/call-options';
 import type { BidiStream, ClientStream, ServerStream } from '../types/stream';
 import type { GrpcChannel } from './channel';
 import { unaryCall, unaryCallSync } from '../calls/unary';
-import { serverStream, clientStream, bidiStream } from '../calls/streaming';
+import {
+  serverStream,
+  clientStream,
+  bidiStream,
+  serverStreamSync,
+  clientStreamSync,
+  bidiStreamSync,
+} from '../calls/streaming';
 import type { MethodDefinition } from '../types/method';
+import type {
+  SyncServerStreamImpl,
+  SyncClientStreamImpl,
+  SyncBidiStreamImpl,
+} from '../streams';
 
 /**
  * gRPC client for making calls to a server.
@@ -208,5 +220,87 @@ export class GrpcClient {
     options?: GrpcCallOptions
   ): BidiStream<Req, Res> {
     return bidiStream(this._hybrid, method, options);
+  }
+
+  // Synchronous (blocking) streaming methods
+
+  /**
+   * Creates a synchronous server streaming call (blocking iteration).
+   *
+   * @param method - Full method name
+   * @param request - Request message
+   * @param options - Optional call configuration
+   * @returns SyncServerStreamImpl for iterating over responses
+   *
+   * @example
+   * ```typescript
+   * const stream = client.serverStreamSync<Query, Result>(
+   *   '/myservice.MyService/Search',
+   *   { query: 'hello' }
+   * );
+   *
+   * for (const result of stream) {
+   *   console.log('Got result:', result); // Blocks until next message
+   * }
+   * ```
+   */
+  public serverStreamSync<Req, Res>(
+    method: string,
+    request: Req,
+    options?: GrpcCallOptions
+  ): SyncServerStreamImpl<Res> {
+    return serverStreamSync(this._hybrid, method, request, options);
+  }
+
+  /**
+   * Creates a synchronous client streaming call (blocking writes/finish).
+   *
+   * @param method - Full method name
+   * @param options - Optional call configuration
+   * @returns SyncClientStreamImpl for sending requests
+   *
+   * @example
+   * ```typescript
+   * const stream = client.clientStreamSync<Item, Summary>(
+   *   '/myservice.MyService/UploadItems'
+   * );
+   *
+   * stream.writeSync({ id: 1, name: 'Item 1' });
+   * stream.writeSync({ id: 2, name: 'Item 2' });
+   * const summary = stream.finish(); // Blocks until response
+   * console.log('Upload complete:', summary);
+   * ```
+   */
+  public clientStreamSync<Req, Res>(
+    method: string,
+    options?: GrpcCallOptions
+  ): SyncClientStreamImpl<Req, Res> {
+    return clientStreamSync(this._hybrid, method, options);
+  }
+
+  /**
+   * Creates a synchronous bidirectional streaming call (blocking reads/writes).
+   *
+   * @param method - Full method name
+   * @param options - Optional call configuration
+   * @returns SyncBidiStreamImpl for sending and receiving messages
+   *
+   * @example
+   * ```typescript
+   * const stream = client.bidiStreamSync<Message, Message>(
+   *   '/myservice.MyService/Chat'
+   * );
+   *
+   * stream.writeSync({ text: 'Hello' });
+   * const response = stream.readSync(); // Blocks until message received
+   * console.log('Received:', response);
+   * stream.finish();
+   * ```
+   */
+  public bidiStreamSync<Req, Res>(
+    method: string,
+    options?: GrpcCallOptions
+  ): SyncBidiStreamImpl<Req, Res> {
+    return bidiStreamSync(this._hybrid, method, options);
   }
 }

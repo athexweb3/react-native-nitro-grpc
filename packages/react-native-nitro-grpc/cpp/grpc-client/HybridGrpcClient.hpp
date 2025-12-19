@@ -45,6 +45,16 @@ class HybridGrpcClient : public HybridGrpcClientSpec {
   std::shared_ptr<HybridGrpcStreamSpec> createBidiStream(const std::string& method, const std::string& metadataJson,
                                                          double deadlineMs) override;
 
+  // Sync stream creation
+  std::shared_ptr<HybridGrpcStreamSpec> createServerStreamSync(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
+                                                               const std::string& metadataJson, double deadlineMs) override;
+
+  std::shared_ptr<HybridGrpcStreamSpec> createClientStreamSync(const std::string& method, const std::string& metadataJson,
+                                                               double deadlineMs) override;
+
+  std::shared_ptr<HybridGrpcStreamSpec> createBidiStreamSync(const std::string& method, const std::string& metadataJson,
+                                                             double deadlineMs) override;
+
  private:
   struct CallRegistry {
     std::unordered_map<std::string, std::shared_ptr<::grpc::ClientContext>> activeCalls;

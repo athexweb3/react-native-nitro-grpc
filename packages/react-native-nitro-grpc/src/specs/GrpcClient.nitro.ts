@@ -102,4 +102,47 @@ export interface GrpcClient
     metadataJson: string,
     deadlineMs: number
   ): GrpcStream;
+
+  // Synchronous (blocking) stream creation methods
+
+  /**
+   * Creates a synchronous server streaming call (blocking reads).
+   * @param method The method name
+   * @param request The serialized request message
+   * @param metadataJson JSON-serialized metadata
+   * @param deadlineMs Deadline in milliseconds
+   * @returns A stream for receiving responses synchronously
+   */
+  createServerStreamSync(
+    method: string,
+    request: ArrayBuffer,
+    metadataJson: string,
+    deadlineMs: number
+  ): GrpcStream;
+
+  /**
+   * Creates a synchronous client streaming call (blocking writes/finish).
+   * @param method The method name
+   * @param metadataJson JSON-serialized metadata
+   * @param deadlineMs Deadline in milliseconds
+   * @returns A stream for sending requests synchronously
+   */
+  createClientStreamSync(
+    method: string,
+    metadataJson: string,
+    deadlineMs: number
+  ): GrpcStream;
+
+  /**
+   * Creates a synchronous bidirectional streaming call (blocking reads/writes).
+   * @param method The method name
+   * @param metadataJson JSON-serialized metadata
+   * @param deadlineMs Deadline in milliseconds
+   * @returns A stream for sending and receiving messages synchronously
+   */
+  createBidiStreamSync(
+    method: string,
+    metadataJson: string,
+    deadlineMs: number
+  ): GrpcStream;
 }

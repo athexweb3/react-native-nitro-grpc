@@ -1,6 +1,6 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { ChannelOptions, ChannelState } from '../types/ChannelTypes';
+import type { ChannelOptions, ChannelState } from '../types/channel-types';
 import type { GrpcChannelCredentials } from '../types/credentials';
 import { ChannelCredentials } from '../types/credentials';
 

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
-import type { StatusObject } from './ChannelTypes';
-import type { GrpcError } from './GrpcError';
+import type { StatusObject } from './channel-types';
+import type { GrpcError } from './grpc-error';
 import type { GrpcMetadata } from './metadata';
 
 /**

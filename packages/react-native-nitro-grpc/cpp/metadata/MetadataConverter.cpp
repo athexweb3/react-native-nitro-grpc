@@ -1,5 +1,5 @@
 #include "MetadataConverter.hpp"
-#include "../../utils/json/JsonParser.hpp"
+#include "../utils/json/JsonParser.hpp"
 #include <stdexcept>
 
 namespace margelo::nitro::grpc {

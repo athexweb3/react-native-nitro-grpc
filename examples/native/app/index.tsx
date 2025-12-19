@@ -223,6 +223,90 @@ export default function Index() {
         <Text style={styles.buttonText}>Run & Cancel Call</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#5856D6' }]}
+        onPress={async () => {
+          try {
+            setStatus('Starting server stream...');
+            setResponse('');
+
+            const channel = new GrpcChannel(
+              `${LOCALHOST}:50051`,
+              ChannelCredentials.createInsecure(),
+            );
+            const client = new GrpcClient(channel);
+
+            // Prepare request: count=5, delay_ms=1000
+            // const encoder = new TextEncoder();
+            const countBytes = new Uint8Array([0x08, 0x05]); // field 1, varint 5
+            const delayBytes = new Uint8Array([0x10, 0xe8, 0x07]); // field 2, varint 1000
+
+            const buffer = new Uint8Array(
+              countBytes.length + delayBytes.length,
+            );
+            buffer.set(countBytes, 0);
+            buffer.set(delayBytes, countBytes.length);
+
+            const stream = client.serverStream(
+              '/myservice.MyService/StreamMessages',
+              buffer,
+            );
+
+            let messages: string[] = [];
+
+            stream.on('data', (data: ArrayBuffer) => {
+              console.log('Received stream data');
+              const view = new Uint8Array(data);
+
+              // Parse protobuf: index (field 1) + message (field 2)
+              try {
+                let offset = 0;
+                let index = 0;
+                let message = '';
+
+                while (offset < view.length) {
+                  const tag = view[offset++];
+                  const field = tag >> 3;
+                  const wireType = tag & 0x07;
+
+                  if (field === 1 && wireType === 0) {
+                    // Varint index
+                    index = view[offset++];
+                  } else if (field === 2 && wireType === 2) {
+                    // String message
+                    const len = view[offset++];
+                    const decoder = new TextDecoder();
+                    message = decoder.decode(view.slice(offset, offset + len));
+                    offset += len;
+                  } else {
+                    break;
+                  }
+                }
+
+                messages.push(`[${index}] ${message}`);
+                setResponse(messages.join('\n'));
+              } catch (e: any) {
+                console.error('Parse error:', e);
+              }
+            });
+
+            stream.on('end', () => {
+              setStatus('Stream completed!');
+              console.log('Stream ended');
+            });
+
+            stream.on('error', (err: any) => {
+              setStatus(`Stream error: ${err.message}`);
+              console.error('Stream error:', err);
+            });
+          } catch (e: any) {
+            console.error(e);
+            setStatus(`Error: ${e.message}`);
+          }
+        }}>
+        <Text style={styles.buttonText}>Test Server Streaming</Text>
+      </TouchableOpacity>
+
       <Text style={styles.label}>Response:</Text>
       <ScrollView style={styles.responseBox}>
         <Text style={styles.responseText}>{response}</Text>

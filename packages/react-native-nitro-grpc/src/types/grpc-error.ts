@@ -1,4 +1,4 @@
-import { GrpcStatus } from './GrpcStatus';
+import { GrpcStatus } from './grpc-status';
 import { GrpcMetadata } from './metadata';
 
 /**

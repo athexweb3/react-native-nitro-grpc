@@ -29,6 +29,38 @@ server.addService(myService.service, {
       callback(null, { token: 'mock-token-' + call.request.username });
     }, 1000);
   },
+
+  streamMessages: (call: any) => {
+    const count = call.request.count || 5;
+    const delayMs = call.request.delay_ms || 1000;
+
+    console.log(`Starting stream with ${count} messages, ${delayMs}ms delay`);
+
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index >= count) {
+        clearInterval(interval);
+        call.end();
+        console.log('Stream completed');
+        return;
+      }
+
+      const response = {
+        index: index,
+        message: `Message ${index + 1} of ${count}`,
+      };
+
+      console.log('Sending:', response);
+      call.write(response);
+      index++;
+    }, delayMs);
+
+    // Handle client cancellation
+    call.on('cancelled', () => {
+      console.log('Client cancelled the stream');
+      clearInterval(interval);
+    });
+  },
 });
 
 server.bindAsync(

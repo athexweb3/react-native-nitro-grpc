@@ -1,6 +1,6 @@
 import { BidiStreamImpl, ClientStreamImpl, ServerStreamImpl } from '..';
 import type { GrpcStream } from '../../specs/GrpcStream.nitro';
-import { GrpcStatus } from '../../types/GrpcStatus';
+import { GrpcStatus } from '../../types/grpc-status';
 import { GrpcMetadata } from '../../types/metadata';
 
 // Mock implementation of HybridGrpcStream
@@ -78,6 +78,20 @@ class MockHybridStream implements GrpcStream {
 
   cancel(): void {
     this.isCancelled = true;
+  }
+
+  // Sync methods (stubs for basic tests)
+  readSync(): ArrayBuffer | null {
+    return null;
+  }
+
+  writeSync(data: ArrayBuffer): void {
+    this.writtenData.push(data);
+  }
+
+  finishSync(): ArrayBuffer | null {
+    this.isWritesDone = true;
+    return null;
   }
 }
 

@@ -1,5 +1,5 @@
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { GrpcCallOptions } from '../types/callOptions';
+import type { GrpcCallOptions } from '../types/call-options';
 import { GrpcMetadata } from '../types/metadata';
 import { serializeMessage, deserializeMessage } from '../utils/serialization';
 import { toAbsoluteDeadline } from '../utils/deadline';

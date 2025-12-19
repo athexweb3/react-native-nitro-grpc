@@ -46,4 +46,27 @@ export interface GrpcStream
    * Cancels the stream.
    */
   cancel(): void;
+
+  // Synchronous (blocking) API for sync streaming
+
+  /**
+   * Reads the next message from the stream synchronously (blocks until data available).
+   * For server streaming and bidi streaming.
+   * @returns The next message, or null if the stream has ended
+   */
+  readSync(): ArrayBuffer | null;
+
+  /**
+   * Writes data to the stream synchronously (blocks if buffer is full).
+   * For client streaming and bidi streaming.
+   * @param data The serialized message to send
+   */
+  writeSync(data: ArrayBuffer): void;
+
+  /**
+   * Finishes the stream and waits for final status synchronously (blocks).
+   * For client streaming - writes done and waits for response.
+   * @returns The response message for client streaming, or null for other types
+   */
+  finishSync(): ArrayBuffer | null;
 }

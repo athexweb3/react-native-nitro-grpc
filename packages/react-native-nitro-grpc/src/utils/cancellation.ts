@@ -1,5 +1,5 @@
-import { GrpcError } from '../types/GrpcError';
-import { GrpcStatus } from '../types/GrpcStatus';
+import { GrpcError } from '../types/grpc-error';
+import { GrpcStatus } from '../types/grpc-status';
 
 /**
  * Checks if an AbortSignal has been aborted.

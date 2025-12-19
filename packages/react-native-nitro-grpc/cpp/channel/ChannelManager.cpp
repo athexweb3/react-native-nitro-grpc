@@ -1,5 +1,6 @@
 #include "ChannelManager.hpp"
-#include "../../utils/json/JsonParser.hpp"
+#include "../utils/json/JsonParser.hpp"
+#include <grpcpp/grpcpp.h>
 #include <stdexcept>
 
 namespace margelo::nitro::grpc {

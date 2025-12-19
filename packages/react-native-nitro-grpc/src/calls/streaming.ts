@@ -1,9 +1,9 @@
 import type { GrpcClient as HybridGrpcClient } from '../specs/GrpcClient.nitro';
-import type { GrpcCallOptions } from '../types/callOptions';
+import type { GrpcCallOptions } from '../types/call-options';
 import { GrpcMetadata } from '../types/metadata';
 import { serializeMessage } from '../utils/serialization';
 import { toAbsoluteDeadline } from '../utils/deadline';
-import { ServerStreamImpl, ClientStreamImpl, BidiStreamImpl } from '../stream';
+import { ServerStreamImpl, ClientStreamImpl, BidiStreamImpl } from '../streams';
 import { ServerStream, ClientStream, BidiStream } from '../types/stream';
 
 /**
@@ -70,4 +70,87 @@ export function bidiStream<Req, Res>(
   );
 
   return new BidiStreamImpl<Req, Res>(hybridStream);
+}
+
+// Synchronous (blocking) stream creation functions
+
+import {
+  SyncServerStreamImpl,
+  SyncClientStreamImpl,
+  SyncBidiStreamImpl,
+} from '../streams';
+import { deserializeMessage } from '../utils/serialization';
+
+/**
+ * Creates a synchronous server streaming call (blocking iteration).
+ */
+export function serverStreamSync<Req, Res>(
+  hybrid: HybridGrpcClient,
+  method: string,
+  request: Req,
+  options?: GrpcCallOptions
+): SyncServerStreamImpl<Res> {
+  const requestBuffer = serializeMessage(request);
+  const metadata = options?.metadata || new GrpcMetadata();
+  const metadataJson = JSON.stringify(metadata.toJSON());
+  const deadlineMs = toAbsoluteDeadline(options?.deadline);
+
+  const hybridStream = hybrid.createServerStreamSync(
+    method,
+    requestBuffer,
+    metadataJson,
+    deadlineMs
+  );
+
+  return new SyncServerStreamImpl<Res>(hybridStream, deserializeMessage);
+}
+
+/**
+ * Creates a synchronous client streaming call (blocking writes/finish).
+ */
+export function clientStreamSync<Req, Res>(
+  hybrid: HybridGrpcClient,
+  method: string,
+  options?: GrpcCallOptions
+): SyncClientStreamImpl<Req, Res> {
+  const metadata = options?.metadata || new GrpcMetadata();
+  const metadataJson = JSON.stringify(metadata.toJSON());
+  const deadlineMs = toAbsoluteDeadline(options?.deadline);
+
+  const hybridStream = hybrid.createClientStreamSync(
+    method,
+    metadataJson,
+    deadlineMs
+  );
+
+  return new SyncClientStreamImpl<Req, Res>(
+    hybridStream,
+    serializeMessage,
+    deserializeMessage
+  );
+}
+
+/**
+ * Creates a synchronous bidirectional streaming call (blocking reads/writes).
+ */
+export function bidiStreamSync<Req, Res>(
+  hybrid: HybridGrpcClient,
+  method: string,
+  options?: GrpcCallOptions
+): SyncBidiStreamImpl<Req, Res> {
+  const metadata = options?.metadata || new GrpcMetadata();
+  const metadataJson = JSON.stringify(metadata.toJSON());
+  const deadlineMs = toAbsoluteDeadline(options?.deadline);
+
+  const hybridStream = hybrid.createBidiStreamSync(
+    method,
+    metadataJson,
+    deadlineMs
+  );
+
+  return new SyncBidiStreamImpl<Req, Res>(
+    hybridStream,
+    serializeMessage,
+    deserializeMessage
+  );
 }

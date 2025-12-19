@@ -1,5 +1,5 @@
-import { GrpcError } from '../types/GrpcError';
-import { GrpcStatus } from '../types/GrpcStatus';
+import { GrpcError } from '../types/grpc-error';
+import { GrpcStatus } from '../types/grpc-status';
 
 /**
  * Type guard to check if an error is a GrpcError.

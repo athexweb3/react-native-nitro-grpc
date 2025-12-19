@@ -36,7 +36,7 @@ describe('Interceptor Chain', () => {
       unary: async <Req, Res>(
         method: string,
         req: Req,
-        options: import('../../types/callOptions').GrpcCallOptions,
+        options: import('../../types/call-options').GrpcCallOptions,
         next: import('../../types/interceptor').NextUnaryFn
       ) => {
         order.push('1-start');
@@ -50,7 +50,7 @@ describe('Interceptor Chain', () => {
       unary: async <Req, Res>(
         method: string,
         req: Req,
-        options: import('../../types/callOptions').GrpcCallOptions,
+        options: import('../../types/call-options').GrpcCallOptions,
         next: import('../../types/interceptor').NextUnaryFn
       ) => {
         order.push('2-start');
@@ -74,7 +74,7 @@ describe('Interceptor Chain', () => {
       unary: async <Req, Res>(
         method: string,
         req: Req,
-        options: import('../../types/callOptions').GrpcCallOptions,
+        options: import('../../types/call-options').GrpcCallOptions,
         next: import('../../types/interceptor').NextUnaryFn
       ) => {
         const metadata = options.metadata || new GrpcMetadata();
