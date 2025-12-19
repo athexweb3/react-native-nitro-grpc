@@ -14,6 +14,13 @@ export interface GrpcClient
    */
   connect(target: string, credentialsJson: string, optionsJson: string): void;
 
+  connectWithCallCredentials(
+    target: string,
+    credentialsJson: string,
+    optionsJson: string,
+    callCredentialsJson: string
+  ): void;
+
   /**
    * Closes the channel and releases resources.
    */

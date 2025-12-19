@@ -43,7 +43,7 @@
     "typescript": "tsc",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "lint:fix": "eslint \"**/*.{js,ts,tsx}\" --fix",
+    "lint:fix": "eslint \"**/*.{js,ts,tsx}\" --fix --no-warn-ignored",
     "format": "prettier --check \"**/*.{js,ts,tsx}\"",
     "format:fix": "prettier --write \"**/*.{js,ts,tsx}\"",
     "release": "release-it --only-version",

@@ -47,6 +47,33 @@ namespace JsonParser {
   Credentials parseCredentials(const std::string& json);
 
   /**
+   * Call credentials parsed from TypeScript (per-RPC authentication)
+   */
+  struct CallCredentials {
+    enum class Type { BEARER, OAUTH2, CUSTOM };
+
+    Type type;
+    std::optional<std::string> token;                           // For Bearer and OAuth2
+    std::optional<std::map<std::string, std::string>> metadata; // For Custom
+  };
+
+  /**
+   * Parse call credentials JSON from TypeScript.
+   *
+   * Expected format:
+   * {
+   *   "type": "bearer" | "oauth2" | "custom",
+   *   "token"?: string,           // For bearer/oauth2
+   *   "metadata"?: { ... }        // For custom
+   * }
+   *
+   * @param json JSON string from TypeScript
+   * @return Parsed call credentials
+   * @throws std::runtime_error if JSON is malformed
+   */
+  CallCredentials parseCallCredentials(const std::string& json);
+
+  /**
    * Parse channel options JSON from TypeScript.
    *
    * Expected format:

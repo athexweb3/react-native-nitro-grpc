@@ -113,18 +113,15 @@ export class ChannelCredentials {
   }
 }
 
+// =============================================================================
+// CALL CREDENTIALS (Per-RPC Authentication)
+// =============================================================================
+
 /**
- * Per-call credentials for authentication.
- * These are applied to individual calls, not to the entire channel.
- *
- * @example
- * ```typescript
- * const callCreds = CallCredentials.createFromMetadata((metadata) => {
- *   metadata.add('authorization', 'Bearer token123');
- * });
- * ```
+ * Metadata-based call credentials (callback approach).
+ * Used with CallOptions for per-RPC authentication.
  */
-export interface GrpcCallCredentials {
+export interface MetadataCallCredentials {
   /**
    * Function that adds authentication metadata to the call.
    */
@@ -134,40 +131,180 @@ export interface GrpcCallCredentials {
 }
 
 /**
+ * Type-based call credentials for OAuth2/JWT/Bearer authentication.
+ * Serialized to JSON and passed to C++ for composite credentials.
+ */
+export type TypedCallCredentials =
+  | BearerTokenCredentials
+  | OAuth2Credentials
+  | CustomCredentials;
+
+/**
+ * Union of all call credential types.
+ */
+export type GrpcCallCredentials =
+  | MetadataCallCredentials
+  | TypedCallCredentials;
+
+/**
+ * Bearer token credentials for JWT, API keys, etc.
+ */
+export interface BearerTokenCredentials {
+  readonly type: 'bearer';
+  readonly token: string;
+}
+
+/**
+ * OAuth2 access token credentials.
+ */
+export interface OAuth2Credentials {
+  readonly type: 'oauth2';
+  readonly token: string;
+}
+
+/**
+ * Custom metadata-based credentials (for advanced use cases).
+ */
+export interface CustomCredentials {
+  readonly type: 'custom';
+  readonly metadata: Record<string, string>;
+}
+
+/**
  * Helper class for creating call credentials.
  */
 export class CallCredentials {
+  // ========== Type-based credentials (for channel-level composite) ==========
+
   /**
-   * Creates call credentials from a metadata generator function.
+   * Creates Bearer token credentials (for JWT, API keys).
+   * Used for channel-level authentication with ChannelCredentials.
+   *
+   * @param token - Bearer token
+   * @returns Bearer credentials
+   *
+   * @example
+   * ```typescript
+   * const callCreds = CallCredentials.createBearer(jwtToken);
+   * client.connect(target, channelCreds, {}, callCreds);
+   * ```
+   */
+  static createBearer(token: string): BearerTokenCredentials {
+    return { type: 'bearer', token };
+  }
+
+  /**
+   * Creates OAuth2 access token credentials.
+   * Used for channel-level authentication with ChannelCredentials.
+   *
+   * @param accessToken - OAuth2 access token
+   * @returns OAuth2 credentials
+   *
+   * @example
+   * ```typescript
+   * const callCreds = CallCredentials.createOAuth2(accessToken);
+   * client.connect(target, channelCreds, {}, callCreds);
+   * ```
+   */
+  static createOAuth2(accessToken: string): OAuth2Credentials {
+    return { type: 'oauth2', token: accessToken };
+  }
+
+  /**
+   * Creates custom metadata credentials.
+   * Used for channel-level authentication with ChannelCredentials.
+   *
+   * @param metadata - Key-value pairs to add as metadata
+   * @returns Custom credentials
+   *
+   * @example
+   * ```typescript
+   * const callCreds = CallCredentials.createCustom({
+   *   'x-api-key': 'secret',
+   *   'x-tenant-id': 'tenant-123'
+   * });
+   * client.connect(target, channelCreds, {}, callCreds);
+   * ```
+   */
+  static createCustom(metadata: Record<string, string>): CustomCredentials {
+    return { type: 'custom', metadata };
+  }
+
+  // ========== Metadata-based credentials (for per-call options) ==========
+
+  /**
+   * Creates metadata-based call credentials from a generator function.
+   * Used with GrpcCallOptions for per-RPC authentication.
    *
    * @param metadataGenerator - Function that applies auth metadata
-   * @returns Call credentials
+   * @returns Metadata call credentials
+   *
+   * @example
+   * ```typescript
+   * const callCreds = CallCredentials.createFromMetadata((metadata) => {
+   *   metadata.add('authorization', 'Bearer ' + getToken());
+   * });
+   *
+   * await client.unaryCall(method, request, { credentials: callCreds });
+   * ```
    */
   static createFromMetadata(
     metadataGenerator: (
       metadata: import('./metadata').GrpcMetadata
     ) => void | Promise<void>
-  ): GrpcCallCredentials {
+  ): MetadataCallCredentials {
     return {
       applyMetadata: metadataGenerator,
     };
   }
 
   /**
-   * Creates call credentials from a static token.
+   * Creates metadata-based call credentials from a static token.
+   * Used with GrpcCallOptions for per-RPC authentication.
    *
    * @param token - Authentication token
    * @param scheme - Auth scheme (default: 'Bearer')
-   * @returns Call credentials
+   * @returns Metadata call credentials
+   *
+   * @example
+   * ```typescript
+   * const callCreds = CallCredentials.createFromToken(token);
+   * await client.unaryCall(method, request, { credentials: callCreds });
+   * ```
    */
   static createFromToken(
     token: string,
     scheme: string = 'Bearer'
-  ): GrpcCallCredentials {
+  ): MetadataCallCredentials {
     return {
-      applyMetadata: (metadata) => {
+      applyMetadata: (metadata: import('./metadata').GrpcMetadata) => {
         metadata.add('authorization', `${scheme} ${token}`);
       },
     };
+  }
+
+  // ========== Serialization (internal) ==========
+
+  /**
+   * Serializes typed call credentials to JSON for C++ bridge.
+   *
+   * @internal
+   * @param credentials - Typed call credentials
+   * @returns JSON string
+   */
+  static toJSON(credentials: TypedCallCredentials): string {
+    return JSON.stringify(credentials);
+  }
+
+  /**
+   * Type guard to check if credentials are typed (vs metadata-based).
+   *
+   * @param credentials - Call credentials
+   * @returns True if typed credentials
+   */
+  static isTyped(
+    credentials: GrpcCallCredentials
+  ): credentials is TypedCallCredentials {
+    return 'type' in credentials;
   }
 }

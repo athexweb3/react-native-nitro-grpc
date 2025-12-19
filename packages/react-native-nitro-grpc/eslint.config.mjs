@@ -46,6 +46,8 @@ export default [
       'ios/**',
       'cpp/**',
       'nitrogen/**',
+      '!src/types/credentials.ts',
+      '!src/specs/GrpcClient.nitro.ts',
     ],
   },
 ];

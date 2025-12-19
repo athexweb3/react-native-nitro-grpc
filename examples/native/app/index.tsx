@@ -10,6 +10,7 @@ import {
   GrpcChannel,
   GrpcClient,
   ChannelCredentials,
+  CallCredentials, // NEW
   type ChannelOptions,
 } from 'react-native-nitro-grpc';
 
@@ -313,6 +314,94 @@ export default function Index() {
           }
         }}>
         <Text style={styles.buttonText}>Test Server Streaming</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#AF52DE' }]}
+        onPress={async () => {
+          try {
+            setStatus('Testing OAuth2/JWT Auth...');
+            setResponse('');
+
+            // Create bearer token credentials
+            const token = 'test-jwt-token-12345';
+            const callCreds = CallCredentials.createBearer(token);
+
+            setStatus(`Connecting with Bearer Token + SSL...`);
+
+            const ROOT_CERT = `-----BEGIN CERTIFICATE-----
+MIIFCTCCAvGgAwIBAgIUSwwcOej4LeUBmx5WnnZjfquiO38wDQYJKoZIhvcNAQEL
+BQAwFDESMBAGA1UEAwwJbG9jYWxob3N0MB4XDTI1MTIxOTE2NTAxMloXDTI2MTIx
+OTE2NTAxMlowFDESMBAGA1UEAwwJbG9jYWxob3N0MIICIjANBgkqhkiG9w0BAQEF
+AAOCAg8AMIICCgKCAgEAlSp6WQP1t/D354UjnwJ9v+5KwSdRhsrmpigNrnE3ShoO
+XruUX8qd360KWuvh8HyE7ofNONpkrdihCtcvKy8AfLgY5S+5MhcZvOUlgAykFW/X
+f+mJJ24zf7HK2NQFFws+9bYePa4PcKV2T6LFe7+TnfC5uJUwUZtb7b3lMxIm1+Iq
+rs94x2MZzFDy0Cg8IdW8du3rEvyboItaJm9tlaudsRGCahYf/fUqwRUutLp5Ruu2
+GkEgkOTytGlNA5KCdVAv9cpdO60zByw2jAdMtG5d61bZ9fC9X+vJTM0mvzDnGd1v
+Yo1mvECTfolWSK7p41H6fMu+dfUpOnZ18Ka69eF4vI1ZBa6j3eblmzFWF/Z8Bcs+
+d/Yrk8udeiy3JfDREpttaPzWsEO5oc9HF5/k0mo1sl9uIDcZsxSZzMiUWxEa4+9+
+2QownRFdT1hsv5Hr+tkdwaGCLq9c3pVqye2iA/z6lPUunuzDNND2JuFAPWmi9HJg
+h8ueH6ToWGVdHvA44cUVhrgndl/9xWFqJA2aU1DNr9UN0vCxvoEsuCY8OuJ1JeS5
+cSIAs3bdls0hZlms0ZdUMdc4liiqfqLVUgHaEPgLQKTWrZaRea+XYozkkmwUzU/o
+m5935b0Jrjk2ktBPBFP8XEGi6p80uhjExgx1LxzOOtGaSV1LcKxvoM9wyw8nGNMC
+AwEAAaNTMFEwHQYDVR0OBBYEFClyNUXXBuUdLp+lI0KA+of+5W+jMB8GA1UdIwQY
+MBaAFClyNUXXBuUdLp+lI0KA+of+5W+jMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZI
+hvcNAQELBQADggIBAEtu/xaouKUSC8zIGDqWiN6ebi/lzLrEIaf6Os0hLi840Qot
+JA8Zqv25zlGSAyWe+MiwmCq3cbLcZ7yFUwu8zJwJoZyWp1N1QI8Ihm6Dt9jVVJ3b
+3sCkNpm2jvZmdH+Ot+/Em+8Oxf+jFK/jGBnlH6UqjoJX9v1Tcs4wGE3mVzk8EfFR
+DX5qrEeHSrPE1EX9hr9pm1y7Iwe4QA/ao/aGF6sJpzSiBWPQ00Fm5w8olLA3q/cC
+waHoVil9T54eK5na4UYqUC/98zw76ujelBCt1LGn/uj1ToryCXig+ud2cQ9wAw55
+bmacpuHoZkbvXl+WwpeHpd//LQ3f4mpP2XqgIyQZt6An/Rd+/eIa2BRtAGbXH8vE
+dA45DPyAIg+7tZLmscgkvSCYN30gd6Jg/JZ8U7CD2jHWgZKW4zLHZrs+eAUeATq2
+QZezkwSOZa4xe9tOd0mq7CwnDeOTBHLxpcgWGpe/raQ1OfirW+VtUU9/pB3D1zEj
+myLPYtYvFCJ49HA4AKZ5A4iG++y7HdPO8ZC9NoXPLYwl1aXqzBfrigMiI+igkLxe
+NsJsdWgBB2kJYLfjOOTLcg25S6eu2vVXFi9VMPandrFvNgfnwJBeWuEwje1Oa00k
+Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
+-----END CERTIFICATE-----`;
+
+            // Create Secure Channel
+            const channel = new GrpcChannel(
+              `${LOCALHOST}:50051`,
+              ChannelCredentials.createSsl(ROOT_CERT),
+              {
+                'grpc.ssl_target_name_override': 'localhost',
+              },
+              callCreds,
+            );
+
+            const client = new GrpcClient(channel);
+
+            // Make Unary Call
+            const username = 'AuthenticatedUser';
+            const encoder = new TextEncoder();
+            const payload = encoder.encode(username);
+            const buffer = new Uint8Array(2 + payload.length);
+            buffer[0] = 0x0a;
+            buffer[1] = payload.length;
+            buffer.set(payload, 2);
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _result = await client.unaryCall(
+              '/myservice.MyService/GetUser',
+              buffer,
+            );
+
+            setStatus('Success with OAuth2!');
+            setResponse(
+              'OAuth2/JWT Auth Test Passed!\n\n' +
+                'Bearer Token successfully injected.\n\n' +
+                'Check server logs to verify metadata received:\n' +
+                `authorization: Bearer ${token}`,
+            );
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (e: any) {
+            console.error(e);
+            setStatus(`Error: ${e.message}`);
+            setResponse(`Failed: ${e.message}`);
+          }
+        }}>
+        <Text style={styles.buttonText}>Test OAuth2/JWT (Bearer Token)</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
