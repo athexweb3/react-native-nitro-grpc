@@ -44,9 +44,17 @@ jobs:
           xcodebuild -version
 
       - name: Install Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.9
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install Dependencies
         run: bun install
@@ -55,9 +63,25 @@ jobs:
         working-directory: ./examples/native
         run: npx expo prebuild --platform ios --no-install
 
+      - name: Cache Pods
+        uses: actions/cache@v4
+        with:
+          path: examples/native/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('examples/native/package.json', 'examples/native/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Install Pods
         working-directory: ./examples/native/ios
         run: pod install
+
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: examples/native/ios/build
+          key: ${{ runner.os }}-ios-derived-data-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ios-derived-data-
 
 
       - name: Build iOS App
