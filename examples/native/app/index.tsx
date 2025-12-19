@@ -99,6 +99,7 @@ export default function Index() {
       } else {
         setResponse(JSON.stringify(result, null, 2));
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error(e);
       setStatus(`Error: ${e.message}`);
@@ -145,6 +146,7 @@ export default function Index() {
       } else {
         setResponse(JSON.stringify(result, null, 2));
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error(e);
       setStatus(`Sync Error: ${e.message}`);
@@ -206,6 +208,7 @@ export default function Index() {
 
             await promise;
             setStatus('Error: Call should have been cancelled but succeeded');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (e: any) {
             console.log('Caught error:', e);
             if (
@@ -252,7 +255,7 @@ export default function Index() {
               buffer,
             );
 
-            let messages: string[] = [];
+            const messages: string[] = [];
 
             stream.on('data', (data: ArrayBuffer) => {
               console.log('Received stream data');
@@ -285,6 +288,7 @@ export default function Index() {
 
                 messages.push(`[${index}] ${message}`);
                 setResponse(messages.join('\n'));
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
               } catch (e: any) {
                 console.error('Parse error:', e);
               }
@@ -295,10 +299,13 @@ export default function Index() {
               console.log('Stream ended');
             });
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             stream.on('error', (err: any) => {
               setStatus(`Stream error: ${err.message}`);
               console.error('Stream error:', err);
             });
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (e: any) {
             console.error(e);
             setStatus(`Error: ${e.message}`);
