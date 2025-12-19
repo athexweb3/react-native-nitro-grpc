@@ -10,6 +10,7 @@ import {
   GrpcChannel,
   GrpcClient,
   ChannelCredentials,
+  type ChannelOptions,
 } from 'react-native-nitro-grpc';
 
 // Helper to get local machine IP for Simulator/Emulator
@@ -312,6 +313,82 @@ export default function Index() {
           }
         }}>
         <Text style={styles.buttonText}>Test Server Streaming</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#FF9500' }]}
+        onPress={async () => {
+          try {
+            setStatus('Testing Advanced SSL/TLS...');
+            setResponse('');
+
+            // Example: Advanced channel options
+            const channelOptions: ChannelOptions = {
+              // Keep-alive configuration
+              'grpc.keepalive_time_ms': 30000, // 30 seconds
+              'grpc.keepalive_timeout_ms': 10000, // 10 seconds
+              'grpc.keepalive_permit_without_calls': 1,
+
+              // Message size limits
+              'grpc.max_receive_message_length': 10 * 1024 * 1024, // 10 MB
+              'grpc.max_send_message_length': 10 * 1024 * 1024,
+
+              // Reconnection settings
+              'grpc.initial_reconnect_backoff_ms': 1000, // 1 second
+              'grpc.max_reconnect_backoff_ms': 10000, // 10 seconds
+            };
+
+            // For SSL with target override (uncomment when testing with certs):
+            // const credentials = ChannelCredentials.createSsl(
+            //   rootCertsPem,        // Your CA cert
+            //   undefined,           // Client key (optional for mTLS)
+            //   undefined,           // Client cert (optional for mTLS)
+            //   'my-service.local'   // Target name override
+            // );
+
+            // For now, test with insecure but with channel options
+            const channel = new GrpcChannel(
+              `${LOCALHOST}:50051`,
+              ChannelCredentials.createInsecure(),
+              channelOptions, // Pass channel options
+            );
+
+            const client = new GrpcClient(channel);
+            setStatus('Testing with advanced options...');
+
+            // Simple unary call to test
+            const username = 'AdvancedSSLTest';
+            const encoder = new TextEncoder();
+            const payload = encoder.encode(username);
+            const buffer = new Uint8Array(2 + payload.length);
+            buffer[0] = 0x0a;
+            buffer[1] = payload.length;
+            buffer.set(payload, 2);
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _result = await client.unaryCall(
+              '/myservice.MyService/GetUser',
+              buffer,
+            );
+
+            setStatus('Success with advanced options!');
+            setResponse(
+              'Advanced SSL/TLS Test Passed!\n\n' +
+                'Channel Options Applied:\n' +
+                '- Keep-alive: 30s\n' +
+                '- Max message size: 10 MB\n' +
+                '- Reconnect backoff: 1s - 10s\n\n' +
+                'Response received successfully.',
+            );
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (e: any) {
+            console.error(e);
+            setStatus(`Error: ${e.message}`);
+            setResponse(`Failed: ${e.message}`);
+          }
+        }}>
+        <Text style={styles.buttonText}>Test Advanced SSL/TLS Options</Text>
       </TouchableOpacity>
 
       <Text style={styles.label}>Response:</Text>

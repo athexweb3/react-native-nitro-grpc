@@ -38,6 +38,29 @@ export interface SslCredentials extends GrpcChannelCredentials {
    * Required for mutual TLS authentication.
    */
   readonly certChain?: string;
+
+  /**
+   * Override the target name used for SSL hostname verification (optional).
+   * Use this when the server's certificate Subject Name doesn't match the target hostname.
+   *
+   * WARNING: Use with caution in production as it bypasses hostname verification.
+   * Only use for:
+   * - Development/testing with self-signed certificates
+   * - Internal services with certificates issued for different names
+   *
+   * @example
+   * ```typescript
+   * // Server certificate is issued for "my-service.internal"
+   * // but you're connecting to "10.0.0.5:50051"
+   * const creds = ChannelCredentials.createSsl(
+   *   rootCertsPem,
+   *   undefined,
+   *   undefined,
+   *   'my-service.internal'
+   * );
+   * ```
+   */
+  readonly targetNameOverride?: string;
 }
 
 /**
@@ -60,18 +83,21 @@ export class ChannelCredentials {
    * @param rootCerts - Optional root CA certificate (PEM)
    * @param privateKey - Optional client private key (PEM)
    * @param certChain - Optional client certificate chain (PEM)
+   * @param targetNameOverride - Optional target name for SSL hostname verification override
    * @returns SSL credentials
    */
   static createSsl(
     rootCerts?: string,
     privateKey?: string,
-    certChain?: string
+    certChain?: string,
+    targetNameOverride?: string
   ): SslCredentials {
     return {
       type: 'ssl',
       rootCerts,
       privateKey,
       certChain,
+      targetNameOverride,
     };
   }
 

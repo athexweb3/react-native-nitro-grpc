@@ -25,6 +25,7 @@ namespace JsonParser {
     std::optional<std::string> rootCerts;
     std::optional<std::string> privateKey;
     std::optional<std::string> certChain;
+    std::optional<std::string> targetNameOverride; // For SSL hostname verification override
   };
 
   /**
@@ -35,7 +36,8 @@ namespace JsonParser {
    *   "type": "insecure" | "ssl",
    *   "rootCerts"?: string,
    *   "privateKey"?: string,
-   *   "certChain"?: string
+   *   "certChain"?: string,
+   *   "targetNameOverride"?: string
    * }
    *
    * @param json JSON string from TypeScript

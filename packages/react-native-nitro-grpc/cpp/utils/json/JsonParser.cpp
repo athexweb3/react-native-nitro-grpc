@@ -35,6 +35,10 @@ namespace JsonParser {
         creds.certChain = j["certChain"].get<std::string>();
       }
 
+      if (j.contains("targetNameOverride") && !j["targetNameOverride"].is_null()) {
+        creds.targetNameOverride = j["targetNameOverride"].get<std::string>();
+      }
+
       return creds;
 
     } catch (const json::exception& e) {
