@@ -51,6 +51,10 @@ jobs:
       - name: Install Dependencies
         run: bun install
 
+      - name: Prebuild
+        working-directory: ./examples/native
+        run: npx expo prebuild --platform ios --no-install
+
       - name: Install Pods
         working-directory: ./examples/native/ios
         run: pod install
