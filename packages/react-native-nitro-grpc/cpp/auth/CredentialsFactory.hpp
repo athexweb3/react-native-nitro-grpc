@@ -2,6 +2,7 @@
 
 #include "../utils/json/JsonParser.hpp"
 #include "BearerTokenPlugin.hpp"
+
 #include <functional>
 #include <grpcpp/security/credentials.h>
 #include <memory>
@@ -16,7 +17,7 @@ namespace margelo::nitro::grpc {
  * and composite credentials (combining both).
  */
 class CredentialsFactory {
- public:
+public:
   /**
    * Creates composite credentials (Channel + Call credentials).
    * Combines SSL/TLS channel security with per-RPC authentication.
@@ -25,7 +26,8 @@ class CredentialsFactory {
    * @param token Bearer token for authentication
    * @return Composite channel credentials
    */
-  static std::shared_ptr<::grpc::ChannelCredentials> createComposite(const JsonParser::Credentials& channelCreds, const std::string& token);
+  static std::shared_ptr<::grpc::ChannelCredentials> createComposite(const JsonParser::Credentials& channelCreds,
+                                                                     const std::string& token);
 
   /**
    * Creates composite credentials with a token provider.
@@ -68,9 +70,10 @@ class CredentialsFactory {
    * @param metadata Key-value pairs to add as metadata
    * @return Call credentials
    */
-  static std::shared_ptr<::grpc::CallCredentials> createCustomMetadata(const std::map<std::string, std::string>& metadata);
+  static std::shared_ptr<::grpc::CallCredentials>
+  createCustomMetadata(const std::map<std::string, std::string>& metadata);
 
- private:
+private:
   /**
    * Helper to create channel credentials from parsed JSON.
    *

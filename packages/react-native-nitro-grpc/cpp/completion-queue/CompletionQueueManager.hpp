@@ -20,7 +20,7 @@ namespace margelo::nitro::grpc {
  * - `GetQueue()` returns the shared CompletionQueue for creating calls.
  */
 class CompletionQueueManager {
- public:
+public:
   // Deleted copy constructors for Singleton pattern
   CompletionQueueManager(const CompletionQueueManager&) = delete;
   CompletionQueueManager& operator=(const CompletionQueueManager&) = delete;
@@ -42,7 +42,7 @@ class CompletionQueueManager {
    */
   std::shared_ptr<::grpc::CompletionQueue> GetQueue();
 
- private:
+private:
   CompletionQueueManager();
 
   void Start();

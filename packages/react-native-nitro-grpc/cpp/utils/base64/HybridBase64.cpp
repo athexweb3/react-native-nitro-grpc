@@ -1,5 +1,7 @@
 #include "HybridBase64.hpp"
+
 #include "../../utils/base64/Base64.hpp"
+
 #include <vector>
 
 namespace margelo::nitro::grpc {

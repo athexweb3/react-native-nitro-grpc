@@ -59,8 +59,7 @@
 template <typename RetString = std::string, typename String = std::string>
 RetString base64_encode(const String& s, bool url = false);
 
-template <typename RetString = std::string, typename String = std::string>
-RetString base64_encode_pem(const String& s);
+template <typename RetString = std::string, typename String = std::string> RetString base64_encode_pem(const String& s);
 
 template <typename RetString = std::string, typename String = std::string>
 RetString base64_encode_mime(const String& s);
@@ -88,14 +87,15 @@ constexpr const char* to_base64_chars[2] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                             "-_"};
 
 constexpr unsigned char from_base64_chars[256] = {
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 62, 64, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64,
-    64, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 63,
-    64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64};
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 62, 64, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+    64, 64, 64, 64, 64, 64, 64, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    22, 23, 24, 25, 64, 64, 64, 64, 63, 64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
+    45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64};
 
 inline unsigned int pos_of_char(const unsigned char chr) {
   //
@@ -112,8 +112,7 @@ inline unsigned int pos_of_char(const unsigned char chr) {
   throw std::runtime_error("Input is not valid base64-encoded data.");
 }
 
-template <typename RetString, typename String>
-inline RetString insert_linebreaks(const String& str, size_t distance) {
+template <typename RetString, typename String> inline RetString insert_linebreaks(const String& str, size_t distance) {
   //
   // Provided by https://github.com/JomaCorpFX, adapted by Rene & Kevin
   //
@@ -139,18 +138,15 @@ inline RetString encode_with_line_breaks(String s) {
   return insert_linebreaks<RetString, String>(base64_encode(s, false), line_length);
 }
 
-template <typename RetString, typename String>
-inline RetString encode_pem(String s) {
+template <typename RetString, typename String> inline RetString encode_pem(String s) {
   return encode_with_line_breaks<RetString, String, 64>(s);
 }
 
-template <typename RetString, typename String>
-inline RetString encode_mime(String s) {
+template <typename RetString, typename String> inline RetString encode_mime(String s) {
   return encode_with_line_breaks<RetString, String, 76>(s);
 }
 
-template <typename RetString, typename String>
-inline RetString encode(String s, bool url) {
+template <typename RetString, typename String> inline RetString encode(String s, bool url) {
   return base64_encode<RetString>(reinterpret_cast<const unsigned char*>(s.data()), s.size(), url);
 }
 
@@ -185,7 +181,8 @@ inline RetString base64_encode(const unsigned char* bytes_to_encode, size_t in_l
       ret.push_back(base64_chars_[((bytes_to_encode[pos + 0] & 0x03) << 4) + ((bytes_to_encode[pos + 1] & 0xf0) >> 4)]);
 
       if (pos + 2 < in_len) {
-        ret.push_back(base64_chars_[((bytes_to_encode[pos + 1] & 0x0f) << 2) + ((bytes_to_encode[pos + 2] & 0xc0) >> 6)]);
+        ret.push_back(
+            base64_chars_[((bytes_to_encode[pos + 1] & 0x0f) << 2) + ((bytes_to_encode[pos + 2] & 0xc0) >> 6)]);
         ret.push_back(base64_chars_[bytes_to_encode[pos + 2] & 0x3f]);
       } else {
         ret.push_back(base64_chars_[(bytes_to_encode[pos + 1] & 0x0f) << 2]);
@@ -260,8 +257,8 @@ inline RetString decode(const String& encoded_string, bool remove_linebreaks) {
     //
     // Emit the first output byte that is produced in each chunk:
     //
-    ret.push_back(
-        static_cast<typename RetString::value_type>(((pos_of_char(encoded_string.at(pos + 0))) << 2) + ((pos_of_char_1 & 0x30) >> 4)));
+    ret.push_back(static_cast<typename RetString::value_type>(((pos_of_char(encoded_string.at(pos + 0))) << 2) +
+                                                              ((pos_of_char_1 & 0x30) >> 4)));
 
     if ((pos + 2 < length_of_string) &&
         // Check for data that is not padded with equal signs (which is allowed by RFC 2045)
@@ -270,13 +267,15 @@ inline RetString decode(const String& encoded_string, bool remove_linebreaks) {
       // Emit a chunk's second byte (which might not be produced in the last chunk).
       //
       unsigned int pos_of_char_2 = pos_of_char(encoded_string.at(pos + 2));
-      ret.push_back(static_cast<typename RetString::value_type>(((pos_of_char_1 & 0x0f) << 4) + ((pos_of_char_2 & 0x3c) >> 2)));
+      ret.push_back(
+          static_cast<typename RetString::value_type>(((pos_of_char_1 & 0x0f) << 4) + ((pos_of_char_2 & 0x3c) >> 2)));
 
       if ((pos + 3 < length_of_string) && encoded_string.at(pos + 3) != '=') {
         //
         // Emit a chunk's third byte (which might not be produced in the last chunk).
         //
-        ret.push_back(static_cast<typename RetString::value_type>(((pos_of_char_2 & 0x03) << 6) + pos_of_char(encoded_string.at(pos + 3))));
+        ret.push_back(static_cast<typename RetString::value_type>(((pos_of_char_2 & 0x03) << 6) +
+                                                                  pos_of_char(encoded_string.at(pos + 3))));
       }
     }
 
@@ -288,22 +287,18 @@ inline RetString decode(const String& encoded_string, bool remove_linebreaks) {
 
 } // namespace detail
 
-template <typename RetString, typename String>
-inline RetString base64_decode(const String& s, bool remove_linebreaks) {
+template <typename RetString, typename String> inline RetString base64_decode(const String& s, bool remove_linebreaks) {
   return detail::decode<RetString, String>(s, remove_linebreaks);
 }
 
-template <typename RetString, typename String>
-inline RetString base64_encode(const String& s, bool url) {
+template <typename RetString, typename String> inline RetString base64_encode(const String& s, bool url) {
   return detail::encode<RetString, String>(s, url);
 }
 
-template <typename RetString, typename String>
-inline RetString base64_encode_pem(const String& s) {
+template <typename RetString, typename String> inline RetString base64_encode_pem(const String& s) {
   return detail::encode_pem<RetString, String>(s);
 }
 
-template <typename RetString, typename String>
-inline RetString base64_encode_mime(const String& s) {
+template <typename RetString, typename String> inline RetString base64_encode_mime(const String& s) {
   return detail::encode_mime<RetString, String>(s);
 }

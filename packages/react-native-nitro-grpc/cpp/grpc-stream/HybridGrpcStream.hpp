@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HybridGrpcStreamSpec.hpp"
+
 #include <NitroModules/ArrayBuffer.hpp>
 #include <atomic>
 #include <condition_variable>
@@ -20,13 +21,17 @@ namespace margelo::nitro::grpc {
 using namespace margelo::nitro;
 
 class HybridGrpcStream : public HybridGrpcStreamSpec {
- public:
+public:
   HybridGrpcStream() : HybridObject(TAG) {}
   ~HybridGrpcStream();
 
   // Initialize server stream
-  void initServerStream(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                        const std::string& metadataJson, int64_t deadlineMs, bool isSync);
+  void initServerStream(std::shared_ptr<::grpc::Channel> channel,
+                        const std::string& method,
+                        const std::shared_ptr<ArrayBuffer>& request,
+                        const std::string& metadataJson,
+                        int64_t deadlineMs,
+                        bool isSync);
 
   void write(const std::shared_ptr<ArrayBuffer>& data) override;
   void writesDone() override;
@@ -42,14 +47,22 @@ class HybridGrpcStream : public HybridGrpcStreamSpec {
   std::variant<nitro::NullType, std::shared_ptr<ArrayBuffer>> finishSync() override;
 
   // Public init methods - called by HybridGrpcClient
-  void initClientStream(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::string& metadataJson,
-                        int64_t deadlineMs, bool isSync);
+  void initClientStream(std::shared_ptr<::grpc::Channel> channel,
+                        const std::string& method,
+                        const std::string& metadataJson,
+                        int64_t deadlineMs,
+                        bool isSync);
 
-  void initBidiStream(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::string& metadataJson,
-                      int64_t deadlineMs, bool isSync);
+  void initBidiStream(std::shared_ptr<::grpc::Channel> channel,
+                      const std::string& method,
+                      const std::string& metadataJson,
+                      int64_t deadlineMs,
+                      bool isSync);
 
- private:
-  void startReading(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::vector<char>& requestData);
+private:
+  void startReading(std::shared_ptr<::grpc::Channel> channel,
+                    const std::string& method,
+                    const std::vector<char>& requestData);
 
   // Stream type
   enum class StreamType { SERVER, CLIENT, BIDI };
@@ -64,9 +77,8 @@ class HybridGrpcStream : public HybridGrpcStreamSpec {
   ::grpc::ByteBuffer _initialRequestBuffer; // For server stream request lifetime
 
   // Helper for blocking queue
-  template <typename T>
-  class BlockingQueue {
-   public:
+  template <typename T> class BlockingQueue {
+  public:
     void push(T value) {
       std::lock_guard<std::mutex> lock(_mutex);
       _queue.push_back(std::move(value));
@@ -99,7 +111,7 @@ class HybridGrpcStream : public HybridGrpcStreamSpec {
       _closed = false;
     }
 
-   private:
+  private:
     std::deque<T> _queue;
     std::mutex _mutex;
     std::condition_variable _cv;

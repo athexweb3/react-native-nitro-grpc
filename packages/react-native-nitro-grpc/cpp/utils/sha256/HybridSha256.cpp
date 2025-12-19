@@ -1,4 +1,5 @@
 #include "HybridSha256.hpp"
+
 #include "picosha2.h"
 
 namespace margelo::nitro::grpc {
