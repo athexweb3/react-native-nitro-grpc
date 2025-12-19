@@ -94,9 +94,9 @@ export default function Index() {
           .join(', ');
         setResponse(
           `Binary Protobuf (${buffer.length} bytes): [${hexArgs}...]\n\n` +
-          (decodedText
-            ? `Decoded Token: "${decodedText}"`
-            : 'Could not decode'),
+            (decodedText
+              ? `Decoded Token: "${decodedText}"`
+              : 'Could not decode'),
         );
       } else {
         setResponse(JSON.stringify(result, null, 2));
@@ -389,9 +389,9 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
             setStatus('Success with OAuth2!');
             setResponse(
               'OAuth2/JWT Auth Test Passed!\n\n' +
-              'Bearer Token successfully injected.\n\n' +
-              'Check server logs to verify metadata received:\n' +
-              `authorization: Bearer ${token}`,
+                'Bearer Token successfully injected.\n\n' +
+                'Check server logs to verify metadata received:\n' +
+                `authorization: Bearer ${token}`,
             );
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -463,11 +463,11 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
             setStatus('Success with advanced options!');
             setResponse(
               'Advanced SSL/TLS Test Passed!\n\n' +
-              'Channel Options Applied:\n' +
-              '- Keep-alive: 30s\n' +
-              '- Max message size: 10 MB\n' +
-              '- Reconnect backoff: 1s - 10s\n\n' +
-              'Response received successfully.',
+                'Channel Options Applied:\n' +
+                '- Keep-alive: 30s\n' +
+                '- Max message size: 10 MB\n' +
+                '- Reconnect backoff: 1s - 10s\n\n' +
+                'Response received successfully.',
             );
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -497,7 +497,11 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
                     initialBackoff: '0.5s',
                     maxBackoff: '10s',
                     backoffMultiplier: 2,
-                    retryableStatusCodes: ['UNAVAILABLE', 'UNKNOWN', 'DEADLINE_EXCEEDED'],
+                    retryableStatusCodes: [
+                      'UNAVAILABLE',
+                      'UNKNOWN',
+                      'DEADLINE_EXCEEDED',
+                    ],
                   },
                 },
               ],
@@ -561,15 +565,15 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
 
             setStatus('Success or Retried!');
             setResponse(JSON.stringify(result, null, 2));
-
-          } catch (e: any) {
+          } catch (e: unknown) {
             console.error(e);
             setStatus(`Retry Test Finished.`);
+            const errorMessage = e instanceof Error ? e.message : String(e);
             setResponse(
               `⚠️ Request Failed as expected.\n\n` +
-              `Check the SERVER terminal now.\n` +
-              `You should see multiple "Received GetUser request" logs for "RetryTestUser".\n\n` +
-              `Error: ${e.message}`
+                `Check the SERVER terminal now.\n` +
+                `You should see multiple "Received GetUser request" logs for "RetryTestUser".\n\n` +
+                `Error: ${errorMessage}`,
             );
           }
         }}>
