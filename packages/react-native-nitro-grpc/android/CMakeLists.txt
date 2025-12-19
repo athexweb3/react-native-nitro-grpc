@@ -9,33 +9,32 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(${PACKAGE_NAME} SHARED
   src/main/cpp/cpp-adapter.cpp
   ../nitrogen/generated/android/grpcOnLoad.cpp
-  ../cpp/src/core/CompletionQueueManager.cpp
-  ../cpp/src/core/channel/ChannelManager.cpp
-  ../cpp/src/core/metadata/MetadataConverter.cpp
-  ../cpp/src/calls/UnaryCall.cpp
-  ../cpp/src/hybrid/HybridGrpcClient.cpp
-  ../cpp/src/utils/json/JsonParser.cpp
-  ../cpp/src/utils/error/ErrorHandler.cpp
-  ../cpp/src/hybrid/base64/HybridBase64.cpp
-  ../cpp/src/hybrid/sha256/HybridSha256.cpp
-  ../cpp/src/hybrid/gzip/HybridGzip.cpp
-  ../cpp/src/hybrid/uuid/HybridUuid.cpp
-)
-
-# Add Nitrogen specs :)
-include(${CMAKE_SOURCE_DIR}/../nitrogen/generated/android/grpc+autolinking.cmake)
-
-# Set up local includes
-include_directories(
-  "src/main/cpp"
-  "../cpp"
-  "../cpp/src"
-  "../cpp/src/core"
-  "../cpp/src/hybrid"
-  "../cpp/src/calls"
-  "../cpp/src/utils"
-  "../cpp/src/utils/json"
-)
+  ../cpp/core/CompletionQueueManager.cpp
+   ../cpp/core/channel/ChannelManager.cpp
+   ../cpp/core/metadata/MetadataConverter.cpp
+   ../cpp/calls/UnaryCall.cpp
+   ../cpp/hybrid/HybridGrpcClient.cpp
+   ../cpp/utils/json/JsonParser.cpp
+   ../cpp/utils/error/ErrorHandler.cpp
+   ../cpp/hybrid/base64/HybridBase64.cpp
+   ../cpp/hybrid/sha256/HybridSha256.cpp
+   ../cpp/hybrid/gzip/HybridGzip.cpp
+   ../cpp/hybrid/uuid/HybridUuid.cpp
+ )
+ 
+ # Add Nitrogen specs :)
+ include(${CMAKE_SOURCE_DIR}/../nitrogen/generated/android/grpc+autolinking.cmake)
+ 
+ # Set up local includes
+ include_directories(
+   "src/main/cpp"
+   "../cpp"
+   "../cpp/core"
+   "../cpp/hybrid"
+   "../cpp/calls"
+   "../cpp/utils"
+   "../cpp/utils/json"
+ )
 
 # Manual Linking of Prefab Artifacts (Bypassing broken find_package)
 set(GRPC_PREFAB_DIR "${CMAKE_SOURCE_DIR}/../../grpc-android-prefab/src/main/prefab")

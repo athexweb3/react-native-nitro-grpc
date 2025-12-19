@@ -9,7 +9,7 @@ namespace margelo::nitro::grpc {
 
 class HybridBase64 : public HybridBase64Spec {
  public:
-  HybridBase64() : HybridBase64Spec() {}
+  HybridBase64() : HybridObject(TAG) {}
 
   std::string encode(const std::shared_ptr<ArrayBuffer>& data, bool urlSafe) override;
   std::shared_ptr<ArrayBuffer> decode(const std::string& base64) override;

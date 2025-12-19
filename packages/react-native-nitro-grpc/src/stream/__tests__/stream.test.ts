@@ -2,7 +2,6 @@ import { BidiStreamImpl, ClientStreamImpl, ServerStreamImpl } from '..';
 import type { GrpcStream } from '../../specs/GrpcStream.nitro';
 import { GrpcStatus } from '../../types/GrpcStatus';
 import { GrpcMetadata } from '../../types/metadata';
-import { stringToUint8Array, uint8ArrayToString } from '../../utils/base64';
 
 // Mock implementation of HybridGrpcStream
 class MockHybridStream implements GrpcStream {
@@ -82,41 +81,45 @@ class MockHybridStream implements GrpcStream {
   }
 }
 
-// Mock client handlers
-const mockClient = {
-  _serializeMessage: jest.fn((msg: string) => stringToUint8Array(msg)),
-  _deserializeMessage: jest.fn((buffer: ArrayBuffer) =>
-    uint8ArrayToString(new Uint8Array(buffer))
-  ),
-};
+// Mock client handlers removed as they are no longer passed to constructor
+// We spy on the util functions instead
 
 describe('StreamImplementations', () => {
   let mockHybrid: MockHybridStream;
 
   beforeEach(() => {
     mockHybrid = new MockHybridStream();
-    mockClient._serializeMessage.mockClear();
-    mockClient._deserializeMessage.mockClear();
+    // Reset mocks
+    jest.clearAllMocks();
+
+    // Spy on the serialization utils
+    // Note: Since we are in the same package, we might need to mock the module
+    // But for unit tests of the class, we can just rely on the real implementation or mock it if needed.
+    // The previous test mocked _serializeMessage on the client object.
+    // Now the classes call the global functions.
+    // For simplicity, let's assume the real functions work (JSON based).
+    // Or if we want to spy:
+    // We would need to import * as Serialization from '../../utils/serialization'
+    // But let's just stick to checking the output which uses the real logic.
   });
 
   describe('ServerStreamImpl', () => {
     let stream: ServerStreamImpl<string>;
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      stream = new ServerStreamImpl(mockHybrid, mockClient as any);
+      stream = new ServerStreamImpl(mockHybrid);
     });
 
     it('emits data events', () => {
       const dataSpy = jest.fn();
       stream.on('data', dataSpy);
 
-      const payload = stringToUint8Array('test-payload');
-      mockHybrid.simulateData(payload.buffer as ArrayBuffer);
+      // We use real serialization in tests now (JSON based as per current impl)
+      const testData = 'test-payload';
+      const encoded = new TextEncoder().encode(JSON.stringify(testData));
 
-      expect(mockClient._deserializeMessage).toHaveBeenCalledWith(
-        payload.buffer
-      );
+      mockHybrid.simulateData(encoded.buffer as ArrayBuffer);
+
       expect(dataSpy).toHaveBeenCalledWith('test-payload');
     });
 
@@ -170,17 +173,17 @@ describe('StreamImplementations', () => {
     let stream: ClientStreamImpl<string, string>;
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      stream = new ClientStreamImpl(mockHybrid, mockClient as any);
+      stream = new ClientStreamImpl(mockHybrid);
     });
 
     it('writes data to hybrid stream', () => {
       stream.write('msg1');
-      expect(mockClient._serializeMessage).toHaveBeenCalledWith('msg1');
       expect(mockHybrid.writtenData).toHaveLength(1);
 
+      // Verify data using real deserialization logic
       const written = new Uint8Array(mockHybrid.writtenData[0]!);
-      expect(uint8ArrayToString(written)).toBe('msg1');
+      const decoded = JSON.parse(new TextDecoder().decode(written));
+      expect(decoded).toBe('msg1');
     });
 
     it('signals writesDone', () => {
@@ -191,8 +194,9 @@ describe('StreamImplementations', () => {
     it('resolves promise on response', async () => {
       const promise = stream.getResponse();
 
-      const response = stringToUint8Array('response-data');
-      mockHybrid.simulateData(response.buffer as ArrayBuffer);
+      const response = 'response-data';
+      const encoded = new TextEncoder().encode(JSON.stringify(response));
+      mockHybrid.simulateData(encoded.buffer as ArrayBuffer);
 
       await expect(promise).resolves.toBe('response-data');
     });
@@ -208,8 +212,7 @@ describe('StreamImplementations', () => {
     let stream: BidiStreamImpl<string, string>;
 
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      stream = new BidiStreamImpl(mockHybrid, mockClient as any);
+      stream = new BidiStreamImpl(mockHybrid);
     });
 
     it('handles full duplex communication', () => {
@@ -221,8 +224,9 @@ describe('StreamImplementations', () => {
       expect(mockHybrid.writtenData).toHaveLength(1);
 
       // Read
-      const pong = stringToUint8Array('pong');
-      mockHybrid.simulateData(pong.buffer as ArrayBuffer);
+      const pong = 'pong';
+      const encoded = new TextEncoder().encode(JSON.stringify(pong));
+      mockHybrid.simulateData(encoded.buffer as ArrayBuffer);
       expect(dataSpy).toHaveBeenCalledWith('pong');
     });
   });

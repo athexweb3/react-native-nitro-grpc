@@ -25,8 +25,15 @@ class HybridGrpcClient : public HybridGrpcClientSpec {
   std::shared_ptr<Promise<void>> watchConnectivityState(double lastState, double deadlineMs) override;
 
   // Unary call
+  // Unary call
   std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> unaryCall(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                                                                   const std::string& metadataJson, double deadlineMs) override;
+                                                                   const std::string& metadataJson, double deadlineMs,
+                                                                   const std::string& callId) override;
+
+  std::shared_ptr<ArrayBuffer> unaryCallSync(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
+                                             const std::string& metadata, double deadline) override;
+
+  void cancelCall(const std::string& callId) override;
 
   // Streaming (to be implemented)
   std::shared_ptr<HybridGrpcStreamSpec> createServerStream(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
@@ -39,8 +46,14 @@ class HybridGrpcClient : public HybridGrpcClientSpec {
                                                          double deadlineMs) override;
 
  private:
+  struct CallRegistry {
+    std::unordered_map<std::string, std::shared_ptr<::grpc::ClientContext>> activeCalls;
+    std::mutex mutex;
+  };
+
   std::shared_ptr<::grpc::Channel> _channel;
   bool _closed = false;
+  std::shared_ptr<CallRegistry> _registry = std::make_shared<CallRegistry>();
 };
 
 } // namespace margelo::nitro::grpc

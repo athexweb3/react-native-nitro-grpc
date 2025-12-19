@@ -30,7 +30,16 @@ class UnaryCall {
    * @param promise Promise to resolve/reject
    */
   static void execute(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                      const std::string& metadataJson, int64_t deadlineMs, std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> promise);
+                      const std::string& metadataJson, int64_t deadlineMs, std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> promise,
+                      std::shared_ptr<::grpc::ClientContext> context, std::function<void()> onComplete);
+
+  /**
+   * Perform unary call synchronously.
+   * Returns result or throws std::runtime_error.
+   */
+  static std::shared_ptr<ArrayBuffer> perform(std::shared_ptr<::grpc::Channel> channel, const std::string& method,
+                                              const std::vector<char>& requestData, const std::string& metadataJson, int64_t deadlineMs,
+                                              std::shared_ptr<::grpc::ClientContext> context);
 };
 
 } // namespace margelo::nitro::grpc

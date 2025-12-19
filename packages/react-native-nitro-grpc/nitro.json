@@ -18,6 +18,18 @@
     },
     "GrpcStream": {
       "cpp": "HybridGrpcStream"
+    },
+    "Base64": {
+      "cpp": "HybridBase64"
+    },
+    "Gzip": {
+      "cpp": "HybridGzip"
+    },
+    "Sha256": {
+      "cpp": "HybridSha256"
+    },
+    "Uuid": {
+      "cpp": "HybridUuid"
     }
   },
   "ignorePaths": [
