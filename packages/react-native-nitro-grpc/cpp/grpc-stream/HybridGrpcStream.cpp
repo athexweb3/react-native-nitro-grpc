@@ -1,4 +1,5 @@
 #include "HybridGrpcStream.hpp"
+#include "../metadata/MetadataConverter.hpp"
 #include "../utils/error/ErrorHandler.hpp"
 #include <grpcpp/support/byte_buffer.h>
 
@@ -22,8 +23,16 @@ void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel
   _isSync = isSync;
   _context = std::make_shared<::grpc::ClientContext>();
 
-  // TODO: Set metadata from metadataJson
-  // TODO: Set deadline from deadlineMs
+  // Set metadata
+  if (!metadataJson.empty()) {
+    MetadataConverter::applyMetadata(metadataJson, *_context);
+  }
+
+  // Set deadline
+  if (deadlineMs > 0) {
+    auto deadline = std::chrono::system_clock::now() + std::chrono::milliseconds(deadlineMs);
+    _context->set_deadline(deadline);
+  }
 
   // Create ByteBuffer correctly (slice stores pointer, verify lifetime)
   // We copy data to _initialRequestBuffer to ensure lifetime validity for async write
@@ -129,6 +138,17 @@ void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel
   _isSync = isSync;
   _context = std::make_shared<::grpc::ClientContext>();
 
+  // Set metadata
+  if (!metadataJson.empty()) {
+    MetadataConverter::applyMetadata(metadataJson, *_context);
+  }
+
+  // Set deadline
+  if (deadlineMs > 0) {
+    auto deadline = std::chrono::system_clock::now() + std::chrono::milliseconds(deadlineMs);
+    _context->set_deadline(deadline);
+  }
+
   ::grpc::GenericStub stub(channel);
   _readerWriter = stub.PrepareCall(_context.get(), method, &_cq);
   _readerWriter->StartCall((void*)1);
@@ -209,7 +229,16 @@ void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel, 
   _isSync = isSync;
   _context = std::make_shared<::grpc::ClientContext>();
 
-  // TODO: Set metadata and deadline
+  // Set metadata
+  if (!metadataJson.empty()) {
+    MetadataConverter::applyMetadata(metadataJson, *_context);
+  }
+
+  // Set deadline
+  if (deadlineMs > 0) {
+    auto deadline = std::chrono::system_clock::now() + std::chrono::milliseconds(deadlineMs);
+    _context->set_deadline(deadline);
+  }
 
   ::grpc::GenericStub stub(channel);
   _readerWriter = stub.PrepareCall(_context.get(), method, &_cq);
