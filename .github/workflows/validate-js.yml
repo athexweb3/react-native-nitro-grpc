@@ -78,7 +78,7 @@ jobs:
 
       - name: Run ESLint (example)
         run: |
-          cd example
+          cd examples/native
           bun lint:fix
           bun format:fix
 
