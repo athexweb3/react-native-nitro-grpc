@@ -33,7 +33,7 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
-          flags: --linelength=140
+          flags: --linelength=120
           targets: --recursive packages/react-native-nitro-grpc/cpp packages/react-native-nitro-grpc/android/src/main/cpp
           filter: "-legal/copyright\
             ,-readability/todo\
