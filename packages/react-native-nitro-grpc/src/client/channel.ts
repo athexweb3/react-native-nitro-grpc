@@ -49,8 +49,16 @@ export class GrpcChannel {
     this._hybrid =
       NitroModules.createHybridObject<HybridGrpcClient>('GrpcClient');
 
+
     const credentialsJson = ChannelCredentials.toJSON(credentials);
-    const optionsJson = options ? JSON.stringify(options) : '{}';
+
+    // Process options
+    const processedOptions = { ...options };
+    if (processedOptions.serviceConfig) {
+      processedOptions['grpc.service_config'] = JSON.stringify(processedOptions.serviceConfig);
+      delete processedOptions.serviceConfig;
+    }
+    const optionsJson = processedOptions ? JSON.stringify(processedOptions) : '{}';
 
     // Connect with call credentials if provided (for composite auth)
     if (callCredentials) {

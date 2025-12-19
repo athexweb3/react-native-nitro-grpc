@@ -23,7 +23,20 @@ const server = new grpc.Server();
 
 server.addService(myService.service, {
   getUser: (call: any, callback: any) => {
-    console.log('Received GetUser request:', call.request);
+    const username = call.request.username;
+    console.log(`[${new Date().toISOString()}] Received GetUser request: ${username}`);
+
+    if (username === 'RetryTestUser') {
+      // Simulate failure for retry testing
+      console.log('!!! SIMULATING FAILURE for RetryTestUser (Triggering Retry) !!!');
+      // Fail with UNAVAILABLE to trigger retry
+      callback({
+        code: grpc.status.UNAVAILABLE,
+        details: 'Simulated failure for retry testing',
+      });
+      return;
+    }
+
     // Add artificial delay to allow cancellation to happen on client
     setTimeout(() => {
       callback(null, { token: 'mock-token-' + call.request.username });

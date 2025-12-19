@@ -11,6 +11,19 @@ namespace margelo::nitro::grpc {
 
 void HybridGrpcClient::connect(const std::string& target, const std::string& credentialsJson, const std::string& optionsJson) {
   try {
+    // Parse options first to get service config
+    auto options = JsonParser::parseChannelOptions(optionsJson);
+    auto channelArgs = ChannelManager::createChannelArguments(options);
+
+    // Apply Service Config (Retry Policy)
+    if (optionsJson.find("serviceConfig") != std::string::npos) {
+      auto fullOptions = nlohmann::json::parse(optionsJson);
+      if (fullOptions.contains("serviceConfig") && fullOptions["serviceConfig"].is_object()) {
+        std::string serviceConfigJson = fullOptions["serviceConfig"].dump();
+        channelArgs.SetServiceConfigJSON(serviceConfigJson);
+      }
+    }
+
     _channel = ChannelManager::createChannel(target, credentialsJson, optionsJson);
     _closed = false;
   } catch (const std::exception& e) {
@@ -75,6 +88,15 @@ void HybridGrpcClient::connectWithCallCredentials(const std::string& target, con
     // Parse channel options and create channel
     auto options = JsonParser::parseChannelOptions(optionsJson);
     auto channelArgs = ChannelManager::createChannelArguments(options);
+
+    // Apply Service Config (Retry Policy)
+    if (optionsJson.find("serviceConfig") != std::string::npos) {
+      auto fullOptions = nlohmann::json::parse(optionsJson);
+      if (fullOptions.contains("serviceConfig") && fullOptions["serviceConfig"].is_object()) {
+        std::string serviceConfigJson = fullOptions["serviceConfig"].dump();
+        channelArgs.SetServiceConfigJSON(serviceConfigJson);
+      }
+    }
 
     // Apply SSL target name override if present
     if (channelCreds.targetNameOverride.has_value()) {
