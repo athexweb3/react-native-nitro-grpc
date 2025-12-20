@@ -241,5 +241,5 @@ export interface ChannelOptions {
    * Service configuration object.
    * Will be serialized to JSON and passed as 'grpc.service_config'.
    */
-  serviceConfig?: Record<string, unknown>;
+  'serviceConfig'?: Record<string, unknown>;
 }
