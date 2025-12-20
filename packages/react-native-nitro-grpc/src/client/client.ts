@@ -18,6 +18,7 @@ import type {
   SyncClientStreamImpl,
   SyncBidiStreamImpl,
 } from '../streams';
+import type { MethodPath } from '../types/branding';
 
 /**
  * gRPC client for making calls to a server.
@@ -109,9 +110,9 @@ export class GrpcClient {
    * ```
    */
   public async unaryCall<Req, Res>(
-    method: string | MethodDefinition<Req, Res>,
+    method: MethodPath | MethodDefinition<Req, Res>,
     request: Req,
-    options?: GrpcCallOptions
+    options?: Readonly<GrpcCallOptions>
   ): Promise<Res> {
     return unaryCall(
       this._hybrid,
@@ -131,9 +132,9 @@ export class GrpcClient {
    * @returns Response message
    */
   public unaryCallSync<Req, Res>(
-    method: string | MethodDefinition<Req, Res>,
+    method: MethodPath | MethodDefinition<Req, Res>,
     request: Req,
-    options?: GrpcCallOptions
+    options?: Readonly<GrpcCallOptions>
   ): Res {
     return unaryCallSync(this._hybrid, method, request, options);
   }
@@ -159,11 +160,17 @@ export class GrpcClient {
    * ```
    */
   public serverStream<Req, Res>(
-    method: string,
+    method: MethodPath,
     request: Req,
-    options?: GrpcCallOptions
+    options?: Readonly<GrpcCallOptions>
   ): ServerStream<Res> {
-    return serverStream(this._hybrid, method, request, options);
+    return serverStream(
+      this._hybrid,
+      method,
+      request,
+      options,
+      this._interceptors
+    );
   }
 
   /**
@@ -188,10 +195,10 @@ export class GrpcClient {
    * ```
    */
   public clientStream<Req, Res>(
-    method: string,
-    options?: GrpcCallOptions
+    method: MethodPath,
+    options?: Readonly<GrpcCallOptions>
   ): ClientStream<Req, Res> {
-    return clientStream(this._hybrid, method, options);
+    return clientStream(this._hybrid, method, options, this._interceptors);
   }
 
   /**
@@ -216,10 +223,10 @@ export class GrpcClient {
    * ```
    */
   public bidiStream<Req, Res>(
-    method: string,
-    options?: GrpcCallOptions
+    method: MethodPath,
+    options?: Readonly<GrpcCallOptions>
   ): BidiStream<Req, Res> {
-    return bidiStream(this._hybrid, method, options);
+    return bidiStream(this._hybrid, method, options, this._interceptors);
   }
 
   // Synchronous (blocking) streaming methods
@@ -245,9 +252,9 @@ export class GrpcClient {
    * ```
    */
   public serverStreamSync<Req, Res>(
-    method: string,
+    method: MethodPath,
     request: Req,
-    options?: GrpcCallOptions
+    options?: Readonly<GrpcCallOptions>
   ): SyncServerStreamImpl<Res> {
     return serverStreamSync(this._hybrid, method, request, options);
   }
@@ -272,8 +279,8 @@ export class GrpcClient {
    * ```
    */
   public clientStreamSync<Req, Res>(
-    method: string,
-    options?: GrpcCallOptions
+    method: MethodPath,
+    options?: Readonly<GrpcCallOptions>
   ): SyncClientStreamImpl<Req, Res> {
     return clientStreamSync(this._hybrid, method, options);
   }
@@ -298,8 +305,8 @@ export class GrpcClient {
    * ```
    */
   public bidiStreamSync<Req, Res>(
-    method: string,
-    options?: GrpcCallOptions
+    method: MethodPath,
+    options?: Readonly<GrpcCallOptions>
   ): SyncBidiStreamImpl<Req, Res> {
     return bidiStreamSync(this._hybrid, method, options);
   }

@@ -8,8 +8,20 @@ export interface GrpcStream
   /**
    * Writes data to the stream.
    * @param data The serialized message to send
+   * @returns `true` if the internal buffer is not full, `false` otherwise (Backpressure).
    */
-  write(data: ArrayBuffer): void;
+  write(data: ArrayBuffer): boolean;
+
+  /**
+   * Pauses reading from the stream (Flow Control).
+   * No new `onData` callbacks will be fired until `resume()` is called.
+   */
+  pause(): void;
+
+  /**
+   * Resumes reading from the stream.
+   */
+  resume(): void;
 
   /**
    * Signals that no more data will be written to the stream.

@@ -4,6 +4,7 @@
 #include "../utils/error/ErrorHandler.hpp"
 
 #include <grpcpp/support/byte_buffer.h>
+#include <iostream>
 
 namespace margelo::nitro::grpc {
 
@@ -13,6 +14,60 @@ HybridGrpcStream::~HybridGrpcStream() {
   cancel();
   if (_readerThread.joinable()) {
     _readerThread.join();
+  }
+}
+
+void HybridGrpcStream::flushWriteQueue() {
+  std::lock_guard<std::recursive_mutex> lock(_queueMutex);
+  if (_writePending)
+    return;
+  if (_writeQueue.empty())
+    return;
+
+  _currentWriteData = _writeQueue.front(); // Keep alive
+  _writeQueue.pop_front();
+  _writePending = true;
+
+  // Use persistent buffer
+  ::grpc::Slice slice(_currentWriteData->data(), _currentWriteData->size());
+  _currentWriteBuffer = ::grpc::ByteBuffer(&slice, 1);
+
+  void* tag = nullptr;
+  if (_streamType == StreamType::CLIENT)
+    tag = (void*)2;
+  else if (_streamType == StreamType::BIDI)
+    tag = (void*)3;
+
+  if (tag && _readerWriter) {
+    _readerWriter->Write(_currentWriteBuffer, tag);
+  }
+}
+
+void HybridGrpcStream::pause() {
+  fprintf(stderr, "[HybridGrpcStream] pause() called! _isPaused -> true\n");
+  _isPaused = true;
+}
+
+void HybridGrpcStream::resume() {
+  fprintf(stderr, "[HybridGrpcStream] resume() called! _isPaused -> false\n");
+  bool wasPaused = _isPaused.exchange(false);
+  if (wasPaused) {
+    bool expected = false;
+    if (_readPending.compare_exchange_strong(expected, true)) {
+      fprintf(stderr, "[HybridGrpcStream] resume() - triggering new Read\n");
+      _readResponseBuffer.Clear();
+      void* tag = nullptr;
+      if (_streamType == StreamType::BIDI)
+        tag = (void*)2;
+      else
+        tag = (void*)4;
+
+      if (_readerWriter) {
+        _readerWriter->Read(&_readResponseBuffer, tag);
+      }
+    } else {
+      fprintf(stderr, "[HybridGrpcStream] resume() - read already pending, no-op\n");
+    }
   }
 }
 
@@ -51,8 +106,7 @@ void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel
   _readerWriter->StartCall((void*)1);
 
   // Start background reading thread
-  _readerThread = std::thread([this]() {
-    ::grpc::ByteBuffer responseBuffer;
+  _readerThread = std::thread([this, method]() {
     void* tag;
     bool ok;
 
@@ -61,6 +115,15 @@ void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel
         // If operation failed (and not Finish), likely stream dead or cancelled
         // But we must continue to let Finish cleanup if possible, or break
         // For server stream reading (4), !ok means EOF usually.
+
+        // Tag 1 (StartCall) failing is critical
+        if ((intptr_t)tag == 1) {
+          std::cerr << "[HybridGrpcStream] StartCall failed for method: " << method
+                    << ", Error: " << _context->debug_error_string() << std::endl;
+          // Cannot proceed if StartCall failed.
+          return;
+        }
+
         if ((intptr_t)tag == 4) {
           // EOF on read, triggers Finish
           _readerWriter->Finish(&_status, (void*)5);
@@ -78,13 +141,16 @@ void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel
         _readerWriter->WritesDone((void*)3);
       } else if ((intptr_t)tag == 3) {
         // WritesDone done -> Start Reading
-        _readerWriter->Read(&responseBuffer, (void*)4);
+        _readPending = true;
+        _readerWriter->Read(&_readResponseBuffer, (void*)4);
       } else if ((intptr_t)tag == 4) {
         // Read done
+        // Read done
+        _readPending = false;
         if (ok) {
           // Process message
           std::vector<::grpc::Slice> slices;
-          responseBuffer.Dump(&slices);
+          _readResponseBuffer.Dump(&slices);
 
           size_t totalSize = 0;
           for (const auto& slice : slices)
@@ -103,9 +169,14 @@ void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel
             _dataCallback(arrayBuffer);
           }
 
-          // Read next
-          responseBuffer.Clear();
-          _readerWriter->Read(&responseBuffer, (void*)4);
+          // Read next if not paused
+          if (_isPaused) {
+            // Do not read. Resume will trigger read.
+          } else {
+            _readPending = true;
+            _readResponseBuffer.Clear();
+            _readerWriter->Read(&_readResponseBuffer, (void*)4);
+          }
         } else {
           // !ok handled above (EOF)
           _readerWriter->Finish(&_status, (void*)5);
@@ -163,7 +234,6 @@ void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel
   _readerThread = std::thread([this]() {
     void* tag;
     bool ok;
-    ::grpc::ByteBuffer responseBuffer;
 
     while (_cq.Next(&tag, &ok)) {
       if (!ok && (intptr_t)tag != 5) {
@@ -175,9 +245,13 @@ void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel
 
       if ((intptr_t)tag == 1) {
         // Stream started. Read the response eventually.
-        _readerWriter->Read(&responseBuffer, (void*)4);
+        _readPending = true;
+        _readerWriter->Read(&_readResponseBuffer, (void*)4);
       } else if ((intptr_t)tag == 2) {
         // Write completed
+        _writePending = false;
+        flushWriteQueue();
+
         if (_isSync && _writePromise) {
           _writePromise->set_value();
           // Important: don't clear _writePromise here, let writesDone or writeSync handle lifetime
@@ -190,9 +264,10 @@ void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel
         }
       } else if ((intptr_t)tag == 4) {
         // Response received
+        _readPending = false;
         if (ok) {
           std::vector<::grpc::Slice> slices;
-          responseBuffer.Dump(&slices);
+          _readResponseBuffer.Dump(&slices);
           size_t totalSize = 0;
           for (const auto& slice : slices)
             totalSize += slice.size();
@@ -254,7 +329,6 @@ void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel,
 
   // Background thread for reading
   _readerThread = std::thread([this]() {
-    ::grpc::ByteBuffer responseBuffer;
     void* tag;
     bool ok;
 
@@ -267,12 +341,14 @@ void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel,
       }
 
       if ((intptr_t)tag == 1) {
-        _readerWriter->Read(&responseBuffer, (void*)2);
+        _readPending = true;
+        _readerWriter->Read(&_readResponseBuffer, (void*)2);
       } else if ((intptr_t)tag == 2) {
         // Read completed
+        _readPending = false;
         if (ok) {
           std::vector<::grpc::Slice> slices;
-          responseBuffer.Dump(&slices);
+          _readResponseBuffer.Dump(&slices);
           size_t totalSize = 0;
           for (const auto& slice : slices)
             totalSize += slice.size();
@@ -288,14 +364,22 @@ void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel,
           } else if (_dataCallback) {
             _dataCallback(arrayBuffer);
           }
-          responseBuffer.Clear();
-          _readerWriter->Read(&responseBuffer, (void*)2);
+
+          if (_isPaused) {
+            // Pause
+          } else {
+            _readPending = true;
+            _readResponseBuffer.Clear();
+            _readerWriter->Read(&_readResponseBuffer, (void*)2);
+          }
         } else {
           // EOF
           _readerWriter->Finish(&_status, (void*)5);
         }
       } else if ((intptr_t)tag == 3) {
         // Write completed
+        _writePending = false;
+        flushWriteQueue();
         if (_isSync && _writePromise) {
           _writePromise->set_value();
         }
@@ -318,19 +402,20 @@ void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel,
   });
 }
 
-void HybridGrpcStream::write(const std::shared_ptr<ArrayBuffer>& data) {
+bool HybridGrpcStream::write(const std::shared_ptr<ArrayBuffer>& data) {
   if (_streamType == StreamType::SERVER) {
     throw std::runtime_error("Cannot write to server stream");
   }
 
-  ::grpc::Slice slice(data->data(), data->size());
-  ::grpc::ByteBuffer buffer(&slice, 1);
+  std::lock_guard<std::recursive_mutex> lock(_queueMutex);
+  _writeQueue.push_back(data);
+  bool isBackpressure = _writeQueue.size() >= HIGH_WATER_MARK;
 
-  if (_streamType == StreamType::CLIENT && _readerWriter) {
-    _readerWriter->Write(buffer, (void*)2);
-  } else if (_streamType == StreamType::BIDI && _readerWriter) {
-    _readerWriter->Write(buffer, (void*)3);
+  if (!_writePending) {
+    flushWriteQueue();
   }
+
+  return !isBackpressure;
 }
 
 void HybridGrpcStream::writesDone() {

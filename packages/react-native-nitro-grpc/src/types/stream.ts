@@ -4,47 +4,22 @@ import type { GrpcError } from './grpc-error';
 import type { GrpcMetadata } from './metadata';
 
 /**
+ * Strict event map for base gRPC stream events.
+ */
+export interface GrpcStreamEvents {
+  metadata: (metadata: GrpcMetadata) => void;
+  status: (status: StatusObject) => void;
+  error: (error: GrpcError) => void;
+}
+
+/**
  * Base class for all gRPC streams.
  * Provides common event handling and lifecycle management.
- *
- * Events:
- * - 'metadata': Emitted when initial metadata is received from the server
- * - 'status': Emitted when the call completes (success or error)
- * - 'error': Emitted when an error occurs
  */
-export abstract class GrpcStreamBase extends EventEmitter {
+export abstract class GrpcStreamBase<
+  Events extends GrpcStreamEvents = GrpcStreamEvents
+> extends EventEmitter<Events> {
   protected _cancelled: boolean = false;
-
-  /**
-   * Listens for initial metadata from the server.
-   * Metadata is received before any response messages.
-   *
-   * @param event - Event name
-   * @param listener - Callback function
-   */
-  on(event: 'metadata', listener: (metadata: GrpcMetadata) => void): this;
-
-  /**
-   * Listens for the final status when the call completes.
-   *
-   * @param event - Event name
-   * @param listener - Callback function
-   */
-  on(event: 'status', listener: (status: StatusObject) => void): this;
-
-  /**
-   * Listens for errors during the call.
-   *
-   * @param event - Event name
-   * @param listener - Callback function
-   */
-  on(event: 'error', listener: (error: GrpcError) => void): this;
-
-  // Catch-all for EventEmitter compatibility
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on(event: string, listener: (...args: any[]) => void): this {
-    return super.on(event, listener);
-  }
 
   /**
    * Cancels the call.
@@ -70,61 +45,40 @@ export abstract class GrpcStreamBase extends EventEmitter {
 }
 
 /**
- * Server streaming call (read-only).
- * Client sends one request, server sends multiple responses.
- *
- * @example
- * ```typescript
- * const stream = client.serverStream('/service/method', request);
- * stream.on('data', (response) => console.log(response));
- * stream.on('end', () => console.log('Stream ended'));
- * stream.on('error', (err) => console.error(err));
- * ```
+ * Events specific to server streams (and bidi).
  */
-export abstract class ServerStream<T> extends GrpcStreamBase {
-  /**
-   * Listens for response messages from the server.
-   *
-   * @param event - Event name
-   * @param listener - Callback receiving the response data
-   */
-  on(event: 'data', listener: (data: T) => void): this;
-
-  /**
-   * Listens for the end of the stream (all data received).
-   *
-   * @param event - Event name
-   * @param listener - Callback function
-   */
-  on(event: 'end', listener: () => void): this;
-
-  on(event: 'metadata', listener: (metadata: GrpcMetadata) => void): this;
-  on(event: 'status', listener: (status: StatusObject) => void): this;
-  on(event: 'error', listener: (error: GrpcError) => void): this;
-
-  // Catch-all for EventEmitter
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on(event: string, listener: (...args: any[]) => void): this {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.on(event as any, listener);
-  }
+export interface ServerStreamEvents<T> extends GrpcStreamEvents {
+  data: (data: T) => void;
+  end: () => void;
 }
 
 /**
- * Client streaming call (write-only with promise response).
- * Client sends multiple requests, server sends one response.
- *
- * @example
- * ```typescript
- * const stream = client.clientStream('/service/method');
- * stream.write(request1);
- * stream.write(request2);
- * stream.end();
- *
- * const response = await stream.getResponse();
- * ```
+ * Server streaming call (read-only).
+ * Client sends one request, server sends multiple responses.
  */
-export abstract class ClientStream<Req, Res> extends GrpcStreamBase {
+export abstract class ServerStream<T> extends GrpcStreamBase<
+  ServerStreamEvents<T>
+> {
+  /**
+   * Pauses reading from the stream.
+   * No 'data' events will be emitted until resume() is called.
+   */
+  abstract pause(): void;
+
+  /**
+   * Resumes reading from the stream.
+   */
+  abstract resume(): void;
+}
+
+/**
+ * Client streams don't have 'data' events (they have a Promise response).
+ * They inherit base events.
+ */
+export abstract class ClientStream<
+  Req,
+  Res
+> extends GrpcStreamBase<GrpcStreamEvents> {
   /**
    * Writes a request message to the server.
    *
@@ -148,48 +102,11 @@ export abstract class ClientStream<Req, Res> extends GrpcStreamBase {
 }
 
 /**
- * Bidirectional streaming call (read and write).
- * Client and server can send multiple messages in both directions.
- *
- * @example
- * ```typescript
- * const stream = client.bidiStream('/service/method');
- *
- * stream.on('data', (response) => console.log('Received:', response));
- * stream.on('end', () => console.log('Server closed stream'));
- *
- * stream.write(request1);
- * stream.write(request2);
- * stream.end();
- * ```
+ * Bidirectional streams have 'data' events like server streams.
  */
-export abstract class BidiStream<Req, Res> extends GrpcStreamBase {
-  /**
-   * Listens for response messages from the server.
-   *
-   * @param event - Event name
-   * @param listener - Callback receiving the response data
-   */
-  on(event: 'data', listener: (data: Res) => void): this;
-
-  /**
-   * Listens for the end of the stream from the server.
-   *
-   * @param event - Event name
-   * @param listener - Callback function
-   */
-  on(event: 'end', listener: () => void): this;
-
-  on(event: 'metadata', listener: (metadata: GrpcMetadata) => void): this;
-  on(event: 'status', listener: (status: StatusObject) => void): this;
-  on(event: 'error', listener: (error: GrpcError) => void): this;
-
-  // Catch-all for EventEmitter
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on(event: string, listener: (...args: any[]) => void): this {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.on(event as any, listener);
-  }
+export abstract class BidiStream<Req, Res> extends GrpcStreamBase<
+  ServerStreamEvents<Res>
+> {
   /**
    * Writes a request message to the server.
    *
@@ -203,4 +120,15 @@ export abstract class BidiStream<Req, Res> extends GrpcStreamBase {
    * The server may continue sending messages.
    */
   abstract end(): void;
+
+  /**
+   * Pauses reading from the stream.
+   * No 'data' events will be emitted until resume() is called.
+   */
+  abstract pause(): void;
+
+  /**
+   * Resumes reading from the stream.
+   */
+  abstract resume(): void;
 }

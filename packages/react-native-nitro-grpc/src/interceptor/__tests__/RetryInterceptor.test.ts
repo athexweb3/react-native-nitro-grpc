@@ -18,7 +18,12 @@ describe('RetryInterceptor', () => {
     const interceptor = new RetryInterceptor();
     mockNext.mockResolvedValue('success');
 
-    const result = await interceptor.unary('/test', {}, mockOptions, mockNext);
+    const result = await interceptor.unary(
+      '/test/method',
+      {},
+      mockOptions,
+      mockNext
+    );
 
     expect(result).toBe('success');
     expect(mockNext).toHaveBeenCalledTimes(1);
@@ -36,7 +41,12 @@ describe('RetryInterceptor', () => {
       .mockRejectedValueOnce(new GrpcError(GrpcStatus.UNAVAILABLE, 'Busy'))
       .mockResolvedValue('success');
 
-    const promise = interceptor.unary('/test', {}, mockOptions, mockNext);
+    const promise = interceptor.unary(
+      '/test/method',
+      {},
+      mockOptions,
+      mockNext
+    );
 
     // Fast-forward time for backoffs
     // 1st retry: ~100ms
@@ -58,7 +68,12 @@ describe('RetryInterceptor', () => {
 
     mockNext.mockRejectedValue(new GrpcError(GrpcStatus.UNAVAILABLE, 'Fail'));
 
-    const promise = interceptor.unary('/test', {}, mockOptions, mockNext);
+    const promise = interceptor.unary(
+      '/test/method',
+      {},
+      mockOptions,
+      mockNext
+    );
 
     // Attach expectation FIRST to catch the rejection (avoids UnhandledPromiseRejectionWarning)
     const expectation = expect(promise).rejects.toThrow('Fail');
@@ -78,7 +93,7 @@ describe('RetryInterceptor', () => {
     );
 
     await expect(
-      interceptor.unary('/test', {}, mockOptions, mockNext)
+      interceptor.unary('/test/method', {}, mockOptions, mockNext)
     ).rejects.toThrow('Bad Args');
 
     expect(mockNext).toHaveBeenCalledTimes(1);
