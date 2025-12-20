@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+# Read the commit message header
+header=$(head -n 1 "$1")
+len=$(echo -n "$header" | wc -c)
+
+if [ "$len" -gt 50 ]; then
+  echo "Error: Commit message header (first line) is too long ($len characters)."
+  echo "Please keep it under 50 characters for a clean git history."
+  echo "Detailed description can follow in subsequent lines."
+  exit 1
+fi
