@@ -43,9 +43,9 @@ export class LoggingInterceptor implements GrpcInterceptor {
   }
 
   unary: UnaryInterceptor = async <Req, Res>(
-    method: string,
+    method: import('../types/branding').MethodPath,
     request: Req,
-    options: GrpcCallOptions,
+    options: Readonly<GrpcCallOptions>,
     next: NextUnaryFn
   ): Promise<Res> => {
     // 1. Sampling Check
@@ -101,6 +101,127 @@ export class LoggingInterceptor implements GrpcInterceptor {
       });
       throw error;
     }
+  };
+
+  serverStreaming: import('../types/interceptor').ServerStreamingInterceptor = <
+    Req,
+    Res
+  >(
+    method: import('../types/branding').MethodPath,
+    request: Req,
+    options: Readonly<GrpcCallOptions>,
+    next: import('../types/interceptor').NextServerStreamingFn
+  ): import('../types/stream').ServerStream<Res> => {
+    // 1. Sampling Check
+    if (Math.random() > this.options.sampleRate) {
+      return next(method, request, options);
+    }
+
+    const { logBody } = this.options;
+    const requestId = Math.random().toString(36).substring(7);
+
+    // 2. Log Start
+    this.log('info', `gRPC Server Stream Started: ${method}`, {
+      requestId,
+      type: 'server-streaming',
+    });
+
+    // 3. Create Stream
+    const stream = next<Req, Res>(method, request, options);
+
+    // 4. Intercept Events
+    stream.on('data', (data) => {
+      if (this.shouldLog('debug')) {
+        this.log('debug', `gRPC Stream Data: ${method}`, {
+          requestId,
+          direction: 'receive',
+          body: logBody ? this.redactBody(data) : '[HIDDEN]',
+        });
+      }
+    });
+
+    stream.on('error', (error) => {
+      this.log('error', `gRPC Stream Error: ${method}`, {
+        requestId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+
+    stream.on('end', () => {
+      this.log('info', `gRPC Stream Ended: ${method}`, { requestId });
+    });
+
+    return stream;
+  };
+
+  clientStreaming: import('../types/interceptor').ClientStreamingInterceptor = <
+    Req,
+    Res
+  >(
+    method: import('../types/branding').MethodPath,
+    options: Readonly<GrpcCallOptions>,
+    next: import('../types/interceptor').NextClientStreamingFn
+  ): import('../types/stream').ClientStream<Req, Res> => {
+    // 1. Sampling Check
+    if (Math.random() > this.options.sampleRate) {
+      return next(method, options);
+    }
+
+    const requestId = Math.random().toString(36).substring(7);
+
+    this.log('info', `gRPC Client Stream Started: ${method}`, {
+      requestId,
+      type: 'client-streaming',
+    });
+
+    const stream = next<Req, Res>(method, options);
+    // TODO: Monkey patch write() to log sent messages if needed.
+    // For now, we only log stream lifecycle and response.
+
+    return stream;
+  };
+
+  bidiStreaming: import('../types/interceptor').BidiStreamingInterceptor = <
+    Req,
+    Res
+  >(
+    method: import('../types/branding').MethodPath,
+    options: Readonly<GrpcCallOptions>,
+    next: import('../types/interceptor').NextBidiStreamingFn
+  ): import('../types/stream').BidiStream<Req, Res> => {
+    // 1. Sampling Check
+    if (Math.random() > this.options.sampleRate) {
+      return next(method, options);
+    }
+
+    const { logBody } = this.options;
+    const requestId = Math.random().toString(36).substring(7);
+
+    this.log('info', `gRPC Bidi Stream Started: ${method}`, {
+      requestId,
+      type: 'bidi-streaming',
+    });
+
+    const stream = next<Req, Res>(method, options);
+
+    stream.on('data', (data) => {
+      if (this.shouldLog('debug')) {
+        this.log('debug', `gRPC Stream Data: ${method}`, {
+          requestId,
+          direction: 'receive',
+          body: logBody ? this.redactBody(data) : '[HIDDEN]',
+        });
+      }
+    });
+
+    stream.on('error', (error) => {
+      this.log('error', `gRPC Stream Error: ${method}`, {
+        requestId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+
+    return stream;
   };
 
   private shouldLog(targetLevel: LogLevel): boolean {

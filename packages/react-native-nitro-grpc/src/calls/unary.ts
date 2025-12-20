@@ -10,15 +10,16 @@ import type {
   NextUnaryFn,
 } from '../interceptor';
 import type { MethodDefinition } from '../types/method';
+import type { MethodPath } from '../types/branding';
 
 /**
  * Makes an asynchronous unary call with interceptors.
  */
 export async function unaryCall<Req, Res>(
   hybrid: HybridGrpcClient,
-  method: string | MethodDefinition<Req, Res>,
+  method: MethodPath | MethodDefinition<Req, Res>,
   request: Req,
-  options: GrpcCallOptions | undefined,
+  options: Readonly<GrpcCallOptions> | undefined,
   interceptors: GrpcInterceptor[]
 ): Promise<Res> {
   const methodName = typeof method === 'string' ? method : method.path;
@@ -89,9 +90,9 @@ export async function unaryCall<Req, Res>(
  */
 export function unaryCallSync<Req, Res>(
   hybrid: HybridGrpcClient,
-  method: string | MethodDefinition<Req, Res>,
+  method: MethodPath | MethodDefinition<Req, Res>,
   request: Req,
-  options?: GrpcCallOptions
+  options?: Readonly<GrpcCallOptions>
 ): Res {
   const methodName = typeof method === 'string' ? method : method.path;
   const serializer =
@@ -122,10 +123,14 @@ export function unaryCallSync<Req, Res>(
  */
 async function applyUnaryInterceptors<Req, Res>(
   interceptors: GrpcInterceptor[],
-  method: string,
+  method: MethodPath,
   request: Req,
-  options: GrpcCallOptions | undefined,
-  finalCall: (m: string, r: Req, o: GrpcCallOptions) => Promise<Res>
+  options: Readonly<GrpcCallOptions> | undefined,
+  finalCall: (
+    m: MethodPath,
+    r: Req,
+    o: Readonly<GrpcCallOptions>
+  ) => Promise<Res>
 ): Promise<Res> {
   const unaryInterceptors = interceptors
     .map((i) => i.unary)
@@ -136,7 +141,11 @@ async function applyUnaryInterceptors<Req, Res>(
   }
 
   let index = 0;
-  const next = async (m: string, r: unknown, o: GrpcCallOptions) => {
+  const next = async (
+    m: MethodPath,
+    r: unknown,
+    o: Readonly<GrpcCallOptions>
+  ) => {
     if (index >= unaryInterceptors.length) {
       return finalCall(m, r as Req, o);
     }

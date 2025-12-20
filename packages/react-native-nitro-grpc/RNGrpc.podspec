@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
     'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
     'DEFINES_MODULE' => 'YES',
     'SWIFT_COMPILATION_MODE' => 'wholemodule',
-    'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_ROOT}/nlohmann_json/single_include"'
+    'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_ROOT}/nlohmann_json/single_include" "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/nitrogen/generated/shared/c++" "$(PODS_TARGET_SRCROOT)/nitrogen/generated/ios"'
   }
 
 

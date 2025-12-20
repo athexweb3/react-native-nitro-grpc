@@ -50,8 +50,17 @@ class MockHybridStream implements GrpcStream {
   }
 
   // Interface methods
-  write(data: ArrayBuffer): void {
+  write(data: ArrayBuffer): boolean {
     this.writtenData.push(data);
+    return true;
+  }
+
+  pause(): void {
+    // mock
+  }
+
+  resume(): void {
+    // mock
   }
 
   writesDone(): void {

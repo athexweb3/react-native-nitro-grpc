@@ -27,9 +27,9 @@ export class RetryInterceptor implements GrpcInterceptor {
   }
 
   unary: UnaryInterceptor = async <Req, Res>(
-    method: string,
+    method: import('../types/branding').MethodPath,
     request: Req,
-    options: GrpcCallOptions,
+    options: Readonly<GrpcCallOptions>,
     next: NextUnaryFn
   ): Promise<Res> => {
     let attempt = 1;

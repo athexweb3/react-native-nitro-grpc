@@ -75,9 +75,18 @@ export class ServerStreamImpl<Res> extends ServerStream<Res> {
     // TODO: Implement in C++
     return 'unknown';
   }
-  private _wrapError(error: unknown): Error {
-    if (error instanceof Error) return error;
-    return new Error(String(error));
+
+  pause(): void {
+    this._hybrid.pause();
+  }
+
+  resume(): void {
+    this._hybrid.resume();
+  }
+
+  private _wrapError(error: unknown): GrpcError {
+    if (error instanceof GrpcError) return error;
+    return new GrpcError(GrpcStatus.INTERNAL, String(error));
   }
 }
 

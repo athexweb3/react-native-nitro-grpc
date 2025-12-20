@@ -1,13 +1,14 @@
 import type { GrpcCallOptions } from './call-options';
+import type { MethodPath } from './branding';
 
 /**
  * Next function for unary interceptors.
  * Calls the next interceptor or the actual transport.
  */
 export type NextUnaryFn = <Req, Res>(
-  method: string,
+  method: MethodPath,
   request: Req,
-  options: GrpcCallOptions
+  options: Readonly<GrpcCallOptions>
 ) => Promise<Res>;
 
 /**
@@ -15,15 +16,50 @@ export type NextUnaryFn = <Req, Res>(
  * Can modify the request, options, or handle errors/response.
  */
 export type UnaryInterceptor = <Req, Res>(
-  method: string,
+  method: MethodPath,
   request: Req,
-  options: GrpcCallOptions,
+  options: Readonly<GrpcCallOptions>,
   next: NextUnaryFn
 ) => Promise<Res>;
 
-// TODO: Streaming Interceptors are more complex, will add later.
-// For now, we focus on Unary which covers 90% of auth/logging use cases.
+export type NextServerStreamingFn = <Req, Res>(
+  method: MethodPath,
+  request: Req,
+  options: Readonly<GrpcCallOptions>
+) => import('./stream').ServerStream<Res>;
+
+export type ServerStreamingInterceptor = <Req, Res>(
+  method: MethodPath,
+  request: Req,
+  options: Readonly<GrpcCallOptions>,
+  next: NextServerStreamingFn
+) => import('./stream').ServerStream<Res>;
+
+export type NextClientStreamingFn = <Req, Res>(
+  method: MethodPath,
+  options: Readonly<GrpcCallOptions>
+) => import('./stream').ClientStream<Req, Res>;
+
+export type ClientStreamingInterceptor = <Req, Res>(
+  method: MethodPath,
+  options: Readonly<GrpcCallOptions>,
+  next: NextClientStreamingFn
+) => import('./stream').ClientStream<Req, Res>;
+
+export type NextBidiStreamingFn = <Req, Res>(
+  method: MethodPath,
+  options: Readonly<GrpcCallOptions>
+) => import('./stream').BidiStream<Req, Res>;
+
+export type BidiStreamingInterceptor = <Req, Res>(
+  method: MethodPath,
+  options: Readonly<GrpcCallOptions>,
+  next: NextBidiStreamingFn
+) => import('./stream').BidiStream<Req, Res>;
 
 export interface GrpcInterceptor {
   unary?: UnaryInterceptor;
+  serverStreaming?: ServerStreamingInterceptor;
+  clientStreaming?: ClientStreamingInterceptor;
+  bidiStreaming?: BidiStreamingInterceptor;
 }

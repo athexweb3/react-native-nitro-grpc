@@ -86,5 +86,14 @@ server.bindAsync(
   grpc.ServerCredentials.createSsl(null, [{ cert_chain: serverCert, private_key: serverKey }]),
   () => {
     console.log('Server running properly at 0.0.0.0:50051 (Secure)');
+
+    // Also bind insecure port for testing
+    server.bindAsync(
+      '0.0.0.0:50052',
+      grpc.ServerCredentials.createInsecure(),
+      () => {
+        console.log('Server running properly at 0.0.0.0:50052 (Insecure)');
+      }
+    );
   },
 );

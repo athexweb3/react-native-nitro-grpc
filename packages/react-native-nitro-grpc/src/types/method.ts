@@ -1,13 +1,10 @@
-/**
- * Definition of a gRPC method.
- * This interface allows providing custom serialization and deserialization logic,
- * typically generated from .proto files.
- */
+import type { MethodPath } from './branding';
+
 export interface MethodDefinition<Req, Res> {
   /**
    * The method path (e.g. "/package.Service/Method")
    */
-  path: string;
+  path: MethodPath;
 
   /**
    * Whether the request is streaming.

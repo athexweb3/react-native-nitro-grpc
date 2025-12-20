@@ -34,7 +34,7 @@ describe('Interceptor Chain', () => {
 
     const interceptor1: GrpcInterceptor = {
       unary: async <Req, Res>(
-        method: string,
+        method: import('../../types/branding').MethodPath,
         req: Req,
         options: import('../../types/call-options').GrpcCallOptions,
         next: import('../../types/interceptor').NextUnaryFn
@@ -48,7 +48,7 @@ describe('Interceptor Chain', () => {
 
     const interceptor2: GrpcInterceptor = {
       unary: async <Req, Res>(
-        method: string,
+        method: import('../../types/branding').MethodPath,
         req: Req,
         options: import('../../types/call-options').GrpcCallOptions,
         next: import('../../types/interceptor').NextUnaryFn
@@ -62,7 +62,7 @@ describe('Interceptor Chain', () => {
 
     client = new GrpcClient(mockChannel, [interceptor1, interceptor2]);
 
-    await client.unaryCall('/test', new Uint8Array(), {
+    await client.unaryCall('/test/method', new Uint8Array(), {
       metadata: new GrpcMetadata(),
     });
 
@@ -72,7 +72,7 @@ describe('Interceptor Chain', () => {
   it('propagates metadata changes downstream', async () => {
     const interceptor: GrpcInterceptor = {
       unary: async <Req, Res>(
-        method: string,
+        method: import('../../types/branding').MethodPath,
         req: Req,
         options: import('../../types/call-options').GrpcCallOptions,
         next: import('../../types/interceptor').NextUnaryFn
@@ -85,7 +85,7 @@ describe('Interceptor Chain', () => {
 
     client = new GrpcClient(mockChannel, [interceptor]);
 
-    await client.unaryCall('/test', new Uint8Array());
+    await client.unaryCall('/test/method', new Uint8Array());
 
     // Verify native call received the modified metadata
     const lastCall = mockHybridClient.unaryCall.mock.calls[0];
@@ -103,9 +103,9 @@ describe('Interceptor Chain', () => {
 
     client = new GrpcClient(mockChannel, [errorInterceptor]);
 
-    await expect(client.unaryCall('/test', new Uint8Array())).rejects.toThrow(
-      'Interceptor failed'
-    );
+    await expect(
+      client.unaryCall('/test/method', new Uint8Array())
+    ).rejects.toThrow('Interceptor failed');
 
     // Native call should NOT have happened
     expect(mockHybridClient.unaryCall).not.toHaveBeenCalled();
@@ -120,8 +120,8 @@ describe('Interceptor Chain', () => {
 
     client = new GrpcClient(mockChannel, [passThroughInterceptor]);
 
-    await expect(client.unaryCall('/test', new Uint8Array())).rejects.toThrow(
-      'Native error'
-    );
+    await expect(
+      client.unaryCall('/test/method', new Uint8Array())
+    ).rejects.toThrow('Native error');
   });
 });

@@ -102,9 +102,9 @@ export class ClientStreamImpl<Req, Res> extends ClientStream<Req, Res> {
     return 'unknown';
   }
 
-  private _wrapError(error: unknown): Error {
-    if (error instanceof Error) return error;
-    return new Error(String(error));
+  private _wrapError(error: unknown): GrpcError {
+    if (error instanceof GrpcError) return error;
+    return new GrpcError(GrpcStatus.INTERNAL, String(error));
   }
 }
 

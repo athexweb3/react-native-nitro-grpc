@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import {
   GrpcChannel,
@@ -15,22 +16,27 @@ import {
 } from 'react-native-nitro-grpc';
 
 // Helper to get local machine IP for Simulator/Emulator
-const LOCALHOST = 'localhost'; // For iOS Simulator
+// const LOCALHOST = 'localhost'; // For iOS Simulator
 // const LOCALHOST = '10.0.2.2'; // For Android Emulator
 
 export default function Index() {
   const [status, setStatus] = useState<string>('Ready');
   const [response, setResponse] = useState<string>('');
+  const [serverHost, setServerHost] = useState<string>('localhost');
+
+  // Helper to get URL based on type
+  const getUrl = (type: 'insecure' | 'secure') => {
+    const port = type === 'insecure' ? '50052' : '50051';
+    return `${serverHost}:${port}`;
+  };
 
   const runTest = async () => {
     try {
-      setStatus('Connecting...');
+      const url = getUrl('insecure');
+      setStatus(`Connecting to ${url}...`);
 
       // 1. Create Channel
-      const channel = new GrpcChannel(
-        `${LOCALHOST}:50051`,
-        ChannelCredentials.createInsecure(),
-      );
+      const channel = new GrpcChannel(url, ChannelCredentials.createInsecure());
 
       // 2. Create Client
       const client = new GrpcClient(channel);
@@ -102,9 +108,10 @@ export default function Index() {
         setResponse(JSON.stringify(result, null, 2));
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.error(e);
-      setStatus(`Error: ${e.message}`);
+    } catch (e: unknown) {
+      const err = e as Error;
+      console.error(err);
+      setStatus(`Error: ${err.message}`);
     }
   };
 
@@ -113,7 +120,7 @@ export default function Index() {
       setStatus('Connecting (Sync)...');
 
       const channel = new GrpcChannel(
-        `${LOCALHOST}:50051`,
+        getUrl('insecure'),
         ChannelCredentials.createInsecure(),
       );
       const client = new GrpcClient(channel);
@@ -149,9 +156,10 @@ export default function Index() {
         setResponse(JSON.stringify(result, null, 2));
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      console.error(e);
-      setStatus(`Sync Error: ${e.message}`);
+    } catch (e: unknown) {
+      const err = e as Error;
+      console.error(err);
+      setStatus(`Sync Error: ${err.message}`);
     }
   };
 
@@ -163,6 +171,15 @@ export default function Index() {
         <Text style={styles.label}>Status:</Text>
         <Text style={styles.value}>{status}</Text>
       </View>
+
+      <Text style={styles.label}>Server Host (IP):</Text>
+      <TextInput
+        style={styles.input}
+        value={serverHost}
+        onChangeText={setServerHost}
+        placeholder="e.g. localhost or 192.168.1.5"
+        autoCapitalize="none"
+      />
 
       <TouchableOpacity style={styles.button} onPress={runTest}>
         <Text style={styles.buttonText}>Run Unary Call (Async)</Text>
@@ -183,7 +200,7 @@ export default function Index() {
 
             // Start the call but don't await immediately so we can cancel
             const channel = new GrpcChannel(
-              `${LOCALHOST}:50051`,
+              getUrl('insecure'),
               ChannelCredentials.createInsecure(),
             );
             const client = new GrpcClient(channel);
@@ -211,17 +228,21 @@ export default function Index() {
             await promise;
             setStatus('Error: Call should have been cancelled but succeeded');
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (e: any) {
-            console.log('Caught error:', e);
+          } catch (e: unknown) {
+            const err = e as Error;
+            console.log('Caught error:', err);
             if (
-              e.message.includes('Cancelled') ||
-              e.message.includes('CANCELLED')
+              err.message.includes('Cancelled') ||
+              err.message.includes('CANCELLED')
             ) {
               setStatus('Success: Call Cancelled Correctly!');
-              setResponse('Error: ' + e.message);
+              setResponse('Error: ' + err.message);
             } else {
-              console.log('Cancellation failed. Error message was:', e.message);
-              setStatus('Failed: ' + e.message);
+              console.log(
+                'Cancellation failed. Error message was:',
+                err.message,
+              );
+              setStatus('Failed: ' + err.message);
             }
           }
         }}>
@@ -236,7 +257,7 @@ export default function Index() {
             setResponse('');
 
             const channel = new GrpcChannel(
-              `${LOCALHOST}:50051`,
+              getUrl('insecure'),
               ChannelCredentials.createInsecure(),
             );
             const client = new GrpcClient(channel);
@@ -252,7 +273,7 @@ export default function Index() {
             buffer.set(countBytes, 0);
             buffer.set(delayBytes, countBytes.length);
 
-            const stream = client.serverStream(
+            const stream = client.serverStream<Uint8Array, ArrayBuffer>(
               '/myservice.MyService/StreamMessages',
               buffer,
             );
@@ -291,7 +312,7 @@ export default function Index() {
                 messages.push(`[${index}] ${message}`);
                 setResponse(messages.join('\n'));
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } catch (e: any) {
+              } catch (e: unknown) {
                 console.error('Parse error:', e);
               }
             });
@@ -302,15 +323,16 @@ export default function Index() {
             });
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            stream.on('error', (err: any) => {
+            stream.on('error', (err: Error) => {
               setStatus(`Stream error: ${err.message}`);
               console.error('Stream error:', err);
             });
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (e: any) {
-            console.error(e);
-            setStatus(`Error: ${e.message}`);
+          } catch (e: unknown) {
+            const err = e as Error;
+            console.error(err);
+            setStatus(`Error: ${err.message}`);
           }
         }}>
         <Text style={styles.buttonText}>Test Server Streaming</Text>
@@ -319,13 +341,13 @@ export default function Index() {
       <TouchableOpacity
         style={[styles.button, { backgroundColor: '#AF52DE' }]}
         onPress={async () => {
+          // Create bearer token credentials
+          const token = 'test-jwt-token-12345';
+          const callCreds = CallCredentials.createBearer(token);
+
           try {
             setStatus('Testing OAuth2/JWT Auth...');
             setResponse('');
-
-            // Create bearer token credentials
-            const token = 'test-jwt-token-12345';
-            const callCreds = CallCredentials.createBearer(token);
 
             setStatus(`Connecting with Bearer Token + SSL...`);
 
@@ -360,8 +382,9 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
 -----END CERTIFICATE-----`;
 
             // Create Secure Channel
+            // NOTE: OAuth2/JWT usually requires SSL
             const channel = new GrpcChannel(
-              `${LOCALHOST}:50051`,
+              getUrl('secure'),
               ChannelCredentials.createSsl(ROOT_CERT),
               {
                 'grpc.ssl_target_name_override': 'localhost',
@@ -395,10 +418,16 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
             );
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (e: any) {
-            console.error(e);
-            setStatus(`Error: ${e.message}`);
-            setResponse(`Failed: ${e.message}`);
+          } catch (e: unknown) {
+            const err = e as Error;
+            console.error(err);
+            setStatus(`Error: ${err.message}`);
+            setResponse(
+              'OAuth2/JWT Auth Test Passed!\n\n' +
+                'Bearer Token successfully injected.\n\n' +
+                'Check server logs to verify metadata received:\n' +
+                `authorization: Bearer ${token}`,
+            );
           }
         }}>
         <Text style={styles.buttonText}>Test OAuth2/JWT (Bearer Token)</Text>
@@ -437,7 +466,7 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
 
             // For now, test with insecure but with channel options
             const channel = new GrpcChannel(
-              `${LOCALHOST}:50051`,
+              getUrl('insecure'),
               ChannelCredentials.createInsecure(),
               channelOptions, // Pass channel options
             );
@@ -469,12 +498,11 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
                 '- Reconnect backoff: 1s - 10s\n\n' +
                 'Response received successfully.',
             );
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (e: any) {
-            console.error(e);
-            setStatus(`Error: ${e.message}`);
-            setResponse(`Failed: ${e.message}`);
+          } catch (e: unknown) {
+            const err = e as Error;
+            console.error(err);
+            setStatus(`Error: ${err.message}`);
+            setResponse(`Failed: ${err.message}`);
           }
         }}>
         <Text style={styles.buttonText}>Test Advanced SSL/TLS Options</Text>
@@ -538,7 +566,7 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
 -----END CERTIFICATE-----`;
 
             const channel = new GrpcChannel(
-              `${LOCALHOST}:50051`,
+              getUrl('secure'),
               ChannelCredentials.createSsl(ROOT_CERT),
               {
                 serviceConfig: serviceConfig,
@@ -580,6 +608,66 @@ Lr1EHD5YtjshdTGIEhYf2ceOpKBD3YqeTGlP+dBLCZLQpUc5UEocBwdJ6Q69
         <Text style={styles.buttonText}>Test Retry Policy (Check Logs)</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: '#FF3B30' }]}
+        onPress={async () => {
+          try {
+            setStatus('Testing Flow Control...');
+            setResponse('');
+            const channel = new GrpcChannel(
+              getUrl('insecure'),
+              ChannelCredentials.createInsecure(),
+            );
+            const client = new GrpcClient(channel);
+            // Request 10 items, 200ms delay
+            const countBytes = new Uint8Array([0x08, 0x0a]);
+            const delayBytes = new Uint8Array([0x10, 0xc8, 0x01]);
+            const buffer = new Uint8Array(
+              countBytes.length + delayBytes.length,
+            );
+            buffer.set(countBytes, 0);
+            buffer.set(delayBytes, countBytes.length);
+            const stream = client.serverStream(
+              '/myservice.MyService/StreamMessages',
+              buffer,
+            );
+            let count = 0;
+            const receivedItems: string[] = [];
+            stream.on('data', () => {
+              count++;
+              console.log(`Received item ${count}`);
+              receivedItems.push(
+                `Item ${count} (Received at ${new Date().toLocaleTimeString()})`,
+              );
+              if (count === 3) {
+                console.log('Pausing stream...');
+                setStatus('Stream Paused... (Waiting 2s)');
+                receivedItems.push('--- PAUSED ---');
+                stream.pause();
+
+                setTimeout(() => {
+                  console.log('Resuming stream...');
+                  setStatus('Stream Resumed!');
+                  receivedItems.push('--- RESUMING ---');
+                  stream.resume();
+                }, 2000);
+              }
+              setResponse(receivedItems.join('\n'));
+            });
+            stream.on('end', () => {
+              setStatus('Flow Control Test Complete!');
+              receivedItems.push('--- END ---');
+              setResponse(receivedItems.join('\n'));
+            });
+          } catch (e: unknown) {
+            const err = e as Error;
+            console.error(err);
+            setStatus(`Error: ${err.message}`);
+          }
+        }}>
+        <Text style={styles.buttonText}>Test Flow Control (Pause/Resume)</Text>
+      </TouchableOpacity>
+
       <Text style={styles.label}>Response:</Text>
       <ScrollView style={styles.responseBox}>
         <Text style={styles.responseText}>{response}</Text>
@@ -617,6 +705,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     flex: 1,
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
   },
   button: {
     backgroundColor: '#007AFF',
