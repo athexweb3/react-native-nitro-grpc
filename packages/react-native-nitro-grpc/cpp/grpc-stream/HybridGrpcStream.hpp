@@ -5,6 +5,7 @@
 #include <NitroModules/ArrayBuffer.hpp>
 #include <atomic>
 #include <condition_variable>
+#include <cstdint>
 #include <deque>
 #include <functional>
 #include <future>
@@ -15,6 +16,8 @@
 #include <optional>
 #include <string>
 #include <thread>
+#include <variant>
+#include <vector>
 
 namespace margelo::nitro::grpc {
 

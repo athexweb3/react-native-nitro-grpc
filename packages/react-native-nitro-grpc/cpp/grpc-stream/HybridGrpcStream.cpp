@@ -3,6 +3,7 @@
 #include "../metadata/MetadataConverter.hpp"
 #include "../utils/error/ErrorHandler.hpp"
 
+#include <cstring>
 #include <grpcpp/support/byte_buffer.h>
 #include <iostream>
 
@@ -144,7 +145,6 @@ void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel
         _readPending = true;
         _readerWriter->Read(&_readResponseBuffer, (void*)4);
       } else if ((intptr_t)tag == 4) {
-        // Read done
         // Read done
         _readPending = false;
         if (ok) {

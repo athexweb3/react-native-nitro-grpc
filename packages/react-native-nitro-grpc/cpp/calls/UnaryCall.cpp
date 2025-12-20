@@ -123,25 +123,24 @@ std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel>
       std::cerr << "[UnaryCall] " << msg << std::endl;
       throw std::runtime_error(msg);
     }
-    // StartCall done -> Write request
-    call->Write(requestBuffer, (void*)2);
-  }
-  else if ((intptr_t)tag == 2) {
-    // Write done -> Close writes
-    call->WritesDone((void*)3);
-  }
-  else if ((intptr_t)tag == 3) {
-    // WritesDone done -> Read response
-    call->Read(&responseBuffer, (void*)4);
-  }
-  else if ((intptr_t)tag == 4) {
-    readDone = ok;
-    // Read done -> Finish
-    call->Finish(&status, (void*)5);
-  }
-  else if ((intptr_t)tag == 5) {
-    // Finish done -> Exit
-    break;
+
+    if ((intptr_t)tag == 1) {
+      // StartCall done -> Write request
+      call->Write(requestBuffer, (void*)2);
+    } else if ((intptr_t)tag == 2) {
+      // Write done -> Close writes
+      call->WritesDone((void*)3);
+    } else if ((intptr_t)tag == 3) {
+      // WritesDone done -> Read response
+      call->Read(&responseBuffer, (void*)4);
+    } else if ((intptr_t)tag == 4) {
+      readDone = ok;
+      // Read done -> Finish
+      call->Finish(&status, (void*)5);
+    } else if ((intptr_t)tag == 5) {
+      // Finish done -> Exit
+      break;
+    }
   }
 }
 
