@@ -1,7 +1,9 @@
 #include "UnaryCall.hpp"
+
 #include "../completion-queue/CompletionQueueManager.hpp"
 #include "../metadata/MetadataConverter.hpp"
 #include "../utils/error/ErrorHandler.hpp"
+
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -13,9 +15,14 @@
 
 namespace margelo::nitro::grpc {
 
-void UnaryCall::execute(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                        const std::string& metadataJson, int64_t deadlineMs, std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> promise,
-                        std::shared_ptr<::grpc::ClientContext> context, std::function<void()> onComplete) {
+void UnaryCall::execute(std::shared_ptr<::grpc::Channel> channel,
+                        const std::string& method,
+                        const std::shared_ptr<ArrayBuffer>& request,
+                        const std::string& metadataJson,
+                        int64_t deadlineMs,
+                        std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> promise,
+                        std::shared_ptr<::grpc::ClientContext> context,
+                        std::function<void()> onComplete) {
   // Use a shared_ptr for the request copy to handle memory safely across threads if strictly needed,
   // but here we just need to copy the data *before* the thread starts.
   // Actually, 'perform' takes ArrayBuffer. But 'ArrayBuffer' is a JSI object, not thread safe.
@@ -42,7 +49,14 @@ void UnaryCall::execute(std::shared_ptr<::grpc::Channel> channel, const std::str
   }
 
   // Execute async
-  std::thread([channel, method, metadataJson, deadlineMs, promise, requestData = std::move(requestData), context, onComplete]() {
+  std::thread([channel,
+               method,
+               metadataJson,
+               deadlineMs,
+               promise,
+               requestData = std::move(requestData),
+               context,
+               onComplete]() {
     try {
       auto result = perform(channel, method, requestData, metadataJson, deadlineMs, context);
       if (onComplete) {
@@ -58,8 +72,11 @@ void UnaryCall::execute(std::shared_ptr<::grpc::Channel> channel, const std::str
   }).detach();
 }
 
-std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel> channel, const std::string& method,
-                                                const std::vector<char>& requestData, const std::string& metadataJson, int64_t deadlineMs,
+std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel> channel,
+                                                const std::string& method,
+                                                const std::vector<char>& requestData,
+                                                const std::string& metadataJson,
+                                                int64_t deadlineMs,
                                                 std::shared_ptr<::grpc::ClientContext> context) {
   // Use passed context
   MetadataConverter::applyMetadata(metadataJson, *context);
@@ -74,7 +91,8 @@ std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel>
   ::grpc::ByteBuffer responseBuffer;
 
   ::grpc::internal::RpcMethod rpcMethod(method.c_str(), nullptr, ::grpc::internal::RpcMethod::NORMAL_RPC);
-  ::grpc::Status status = ::grpc::internal::BlockingUnaryCall(channel.get(), rpcMethod, context.get(), requestBuffer, &responseBuffer);
+  ::grpc::Status status =
+      ::grpc::internal::BlockingUnaryCall(channel.get(), rpcMethod, context.get(), requestBuffer, &responseBuffer);
 
   if (status.ok()) {
     std::vector<::grpc::Slice> slices;
@@ -93,8 +111,8 @@ std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel>
     //
     // REVISION:
     // perform(...) returns std::vector<uint8_t>
-    // execute(...) wraps valid vector into ArrayBuffer (Wait, JSI ArrayBuffer creation must happen on JS Thread? No, allocate is fine on
-    // any thread? No, JSI is single threaded usually). nitro::ArrayBuffer acts as a JSI wrapper.
+    // execute(...) wraps valid vector into ArrayBuffer (Wait, JSI ArrayBuffer creation must happen on JS Thread? No,
+    // allocate is fine on any thread? No, JSI is single threaded usually). nitro::ArrayBuffer acts as a JSI wrapper.
     //
     // If we are on a background thread, we CANNOT create a JSI ArrayBuffer to pass to promise->resolve().
     // Nitro's Promise::resolve takes T. T is std::shared_ptr<ArrayBuffer>.
@@ -104,9 +122,9 @@ std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel>
     // `ArrayBuffer::allocate` uses `jsi::ArrayBuffer` constructor which requires `jsi::Runtime`.
     // We DON'T have `jsi::Runtime` on the background thread.
     //
-    // This means my previous implementation of `UnaryCall.cpp` (lines 75-81) was technically UNSAFE if `ArrayBuffer::allocate` touches JSI.
-    // Let's check `NitroModules/ArrayBuffer.hpp`.
-    // Usually Nitro provides a thread-safe way or copies.
+    // This means my previous implementation of `UnaryCall.cpp` (lines 75-81) was technically UNSAFE if
+    // `ArrayBuffer::allocate` touches JSI. Let's check `NitroModules/ArrayBuffer.hpp`. Usually Nitro provides a
+    // thread-safe way or copies.
 
     // Assumption: For now, I will assume ArrayBuffer::allocate IS NOT thread safe.
     // So `perform` should return `std::vector<uint8_t>`.
@@ -127,17 +145,19 @@ std::shared_ptr<ArrayBuffer> UnaryCall::perform(std::shared_ptr<::grpc::Channel>
     // Then `unaryCallSync` creates ArrayBuffer from it.
     // `execute`? Use `promise->resolve`... wait, does existing UnaryCall work?
     // "Fix Threading Crash" was about accessing INPUT buffer.
-    // OUTPUT buffer creation `ArrayBuffer::allocate` was happening on BG thread. If it worked (User said "Success!" with hardcoded
-    // response), then `ArrayBuffer::allocate` IS thread safe or lucky. Nitro docs say `HybridObject` methods run on arbitrary threads. But
-    // `ArrayBuffer` wraps JSI.
+    // OUTPUT buffer creation `ArrayBuffer::allocate` was happening on BG thread. If it worked (User said "Success!"
+    // with hardcoded response), then `ArrayBuffer::allocate` IS thread safe or lucky. Nitro docs say `HybridObject`
+    // methods run on arbitrary threads. But `ArrayBuffer` wraps JSI.
 
-    // Let's assume `ArrayBuffer::allocate` IS fine (maybe it uses a distinct runtime or just mallocs until passed to JS).
-    // So I will stick to returning `ArrayBuffer` from `perform` for now, but I must provide `vector` input.
+    // Let's assume `ArrayBuffer::allocate` IS fine (maybe it uses a distinct runtime or just mallocs until passed to
+    // JS). So I will stick to returning `ArrayBuffer` from `perform` for now, but I must provide `vector` input.
 
     auto result = ArrayBuffer::allocate(totalSize);
     size_t offset = 0;
     for (const auto& slice : slices) {
-      std::memcpy(static_cast<uint8_t*>(result->data()) + offset, reinterpret_cast<const uint8_t*>(slice.begin()), slice.size());
+      std::memcpy(static_cast<uint8_t*>(result->data()) + offset,
+                  reinterpret_cast<const uint8_t*>(slice.begin()),
+                  slice.size());
       offset += slice.size();
     }
     return result;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/json/JsonParser.hpp"
+
 #include <grpcpp/grpcpp.h>
 #include <memory>
 #include <string>
@@ -14,7 +15,7 @@ namespace margelo::nitro::grpc {
  * Follows singleton pattern for channel reuse.
  */
 class ChannelManager {
- public:
+public:
   /**
    * Create a channel with credentials and options.
    *
@@ -24,8 +25,8 @@ class ChannelManager {
    * @return Shared pointer to gRPC channel
    * @throws std::runtime_error if parsing fails
    */
-  static std::shared_ptr<::grpc::Channel> createChannel(const std::string& target, const std::string& credentialsJson,
-                                                        const std::string& optionsJson);
+  static std::shared_ptr<::grpc::Channel>
+  createChannel(const std::string& target, const std::string& credentialsJson, const std::string& optionsJson);
 
   /**
    * Create channel credentials from parsed data.
@@ -43,7 +44,7 @@ class ChannelManager {
    */
   static ::grpc::ChannelArguments createChannelArguments(const std::map<std::string, std::string>& options);
 
- private:
+private:
 };
 
 } // namespace margelo::nitro::grpc

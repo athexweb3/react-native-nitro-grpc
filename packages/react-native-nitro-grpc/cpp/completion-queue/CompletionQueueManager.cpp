@@ -1,4 +1,5 @@
 #include "CompletionQueueManager.hpp"
+
 #include <iostream>
 
 namespace margelo::nitro::grpc {

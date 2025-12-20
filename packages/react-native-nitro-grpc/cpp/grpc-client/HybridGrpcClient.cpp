@@ -1,16 +1,33 @@
 #include "HybridGrpcClient.hpp"
+
 #include "../auth/CredentialsFactory.hpp" // NEW
 #include "../calls/UnaryCall.hpp"
 #include "../channel/ChannelManager.hpp"
 #include "../grpc-stream/HybridGrpcStream.hpp"
 #include "../utils/json/JsonParser.hpp" // NEW
+
 #include <iostream>
 #include <stdexcept>
 
 namespace margelo::nitro::grpc {
 
-void HybridGrpcClient::connect(const std::string& target, const std::string& credentialsJson, const std::string& optionsJson) {
+void HybridGrpcClient::connect(const std::string& target,
+                               const std::string& credentialsJson,
+                               const std::string& optionsJson) {
   try {
+    // Parse options first to get service config
+    auto options = JsonParser::parseChannelOptions(optionsJson);
+    auto channelArgs = ChannelManager::createChannelArguments(options);
+
+    // Apply Service Config (Retry Policy)
+    if (optionsJson.find("serviceConfig") != std::string::npos) {
+      auto fullOptions = nlohmann::json::parse(optionsJson);
+      if (fullOptions.contains("serviceConfig") && fullOptions["serviceConfig"].is_object()) {
+        std::string serviceConfigJson = fullOptions["serviceConfig"].dump();
+        channelArgs.SetServiceConfigJSON(serviceConfigJson);
+      }
+    }
+
     _channel = ChannelManager::createChannel(target, credentialsJson, optionsJson);
     _closed = false;
   } catch (const std::exception& e) {
@@ -19,8 +36,10 @@ void HybridGrpcClient::connect(const std::string& target, const std::string& cre
 }
 
 // NEW: Connect with call credentials (OAuth2/JWT)
-void HybridGrpcClient::connectWithCallCredentials(const std::string& target, const std::string& credentialsJson,
-                                                  const std::string& optionsJson, const std::string& callCredentialsJson) {
+void HybridGrpcClient::connectWithCallCredentials(const std::string& target,
+                                                  const std::string& credentialsJson,
+                                                  const std::string& optionsJson,
+                                                  const std::string& callCredentialsJson) {
   try {
     // Parse channel and call credentials
     auto channelCreds = JsonParser::parseCredentials(credentialsJson);
@@ -39,16 +58,18 @@ void HybridGrpcClient::connectWithCallCredentials(const std::string& target, con
         throw std::runtime_error("OAuth2 access token is missing");
       }
       // Use CredentialsFactory to create OAuth2 composite
-      auto channel_creds = (channelCreds.type == JsonParser::Credentials::Type::INSECURE) ? ::grpc::InsecureChannelCredentials() : [&]() {
-        ::grpc::SslCredentialsOptions ssl_opts;
-        if (channelCreds.rootCerts.has_value())
-          ssl_opts.pem_root_certs = channelCreds.rootCerts.value();
-        if (channelCreds.privateKey.has_value())
-          ssl_opts.pem_private_key = channelCreds.privateKey.value();
-        if (channelCreds.certChain.has_value())
-          ssl_opts.pem_cert_chain = channelCreds.certChain.value();
-        return ::grpc::SslCredentials(ssl_opts);
-      }();
+      auto channel_creds = (channelCreds.type == JsonParser::Credentials::Type::INSECURE)
+                               ? ::grpc::InsecureChannelCredentials()
+                               : [&]() {
+                                   ::grpc::SslCredentialsOptions ssl_opts;
+                                   if (channelCreds.rootCerts.has_value())
+                                     ssl_opts.pem_root_certs = channelCreds.rootCerts.value();
+                                   if (channelCreds.privateKey.has_value())
+                                     ssl_opts.pem_private_key = channelCreds.privateKey.value();
+                                   if (channelCreds.certChain.has_value())
+                                     ssl_opts.pem_cert_chain = channelCreds.certChain.value();
+                                   return ::grpc::SslCredentials(ssl_opts);
+                                 }();
 
       auto call_creds = CredentialsFactory::createAccessToken(callCreds.token.value());
       compositeCreds = ::grpc::CompositeChannelCredentials(channel_creds, call_creds);
@@ -58,16 +79,18 @@ void HybridGrpcClient::connectWithCallCredentials(const std::string& target, con
       }
       auto metadata_creds = CredentialsFactory::createCustomMetadata(callCreds.metadata.value());
 
-      auto channel_creds = (channelCreds.type == JsonParser::Credentials::Type::INSECURE) ? ::grpc::InsecureChannelCredentials() : [&]() {
-        ::grpc::SslCredentialsOptions ssl_opts;
-        if (channelCreds.rootCerts.has_value())
-          ssl_opts.pem_root_certs = channelCreds.rootCerts.value();
-        if (channelCreds.privateKey.has_value())
-          ssl_opts.pem_private_key = channelCreds.privateKey.value();
-        if (channelCreds.certChain.has_value())
-          ssl_opts.pem_cert_chain = channelCreds.certChain.value();
-        return ::grpc::SslCredentials(ssl_opts);
-      }();
+      auto channel_creds = (channelCreds.type == JsonParser::Credentials::Type::INSECURE)
+                               ? ::grpc::InsecureChannelCredentials()
+                               : [&]() {
+                                   ::grpc::SslCredentialsOptions ssl_opts;
+                                   if (channelCreds.rootCerts.has_value())
+                                     ssl_opts.pem_root_certs = channelCreds.rootCerts.value();
+                                   if (channelCreds.privateKey.has_value())
+                                     ssl_opts.pem_private_key = channelCreds.privateKey.value();
+                                   if (channelCreds.certChain.has_value())
+                                     ssl_opts.pem_cert_chain = channelCreds.certChain.value();
+                                   return ::grpc::SslCredentials(ssl_opts);
+                                 }();
 
       compositeCreds = ::grpc::CompositeChannelCredentials(channel_creds, metadata_creds);
     }
@@ -75,6 +98,15 @@ void HybridGrpcClient::connectWithCallCredentials(const std::string& target, con
     // Parse channel options and create channel
     auto options = JsonParser::parseChannelOptions(optionsJson);
     auto channelArgs = ChannelManager::createChannelArguments(options);
+
+    // Apply Service Config (Retry Policy)
+    if (optionsJson.find("serviceConfig") != std::string::npos) {
+      auto fullOptions = nlohmann::json::parse(optionsJson);
+      if (fullOptions.contains("serviceConfig") && fullOptions["serviceConfig"].is_object()) {
+        std::string serviceConfigJson = fullOptions["serviceConfig"].dump();
+        channelArgs.SetServiceConfigJSON(serviceConfigJson);
+      }
+    }
 
     // Apply SSL target name override if present
     if (channelCreds.targetNameOverride.has_value()) {
@@ -110,10 +142,12 @@ std::shared_ptr<Promise<void>> HybridGrpcClient::watchConnectivityState(double l
   return promise;
 }
 
-std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> HybridGrpcClient::unaryCall(const std::string& method,
-                                                                                   const std::shared_ptr<ArrayBuffer>& request,
-                                                                                   const std::string& metadataJson, double deadlineMs,
-                                                                                   const std::string& callId) {
+std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>
+HybridGrpcClient::unaryCall(const std::string& method,
+                            const std::shared_ptr<ArrayBuffer>& request,
+                            const std::string& metadataJson,
+                            double deadlineMs,
+                            const std::string& callId) {
   if (_closed || !_channel) {
     auto promise = Promise<std::shared_ptr<ArrayBuffer>>::create();
     promise->reject(std::make_exception_ptr(std::runtime_error("Channel is closed")));
@@ -143,8 +177,10 @@ std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> HybridGrpcClient::unaryCa
   return promise;
 }
 
-std::shared_ptr<ArrayBuffer> HybridGrpcClient::unaryCallSync(const std::string& method, const std::shared_ptr<ArrayBuffer>& request,
-                                                             const std::string& metadata, double deadline) {
+std::shared_ptr<ArrayBuffer> HybridGrpcClient::unaryCallSync(const std::string& method,
+                                                             const std::shared_ptr<ArrayBuffer>& request,
+                                                             const std::string& metadata,
+                                                             double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }
@@ -176,7 +212,8 @@ void HybridGrpcClient::cancelCall(const std::string& callId) {
 
 std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createServerStream(const std::string& method,
                                                                            const std::shared_ptr<ArrayBuffer>& request,
-                                                                           const std::string& metadataJson, double deadline) {
+                                                                           const std::string& metadataJson,
+                                                                           double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }
@@ -190,9 +227,11 @@ std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createServerStream(const
   return stream;
 }
 
-std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createServerStreamSync(const std::string& method,
-                                                                               const std::shared_ptr<ArrayBuffer>& request,
-                                                                               const std::string& metadataJson, double deadline) {
+std::shared_ptr<HybridGrpcStreamSpec>
+HybridGrpcClient::createServerStreamSync(const std::string& method,
+                                         const std::shared_ptr<ArrayBuffer>& request,
+                                         const std::string& metadataJson,
+                                         double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }
@@ -204,8 +243,8 @@ std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createServerStreamSync(c
   return stream;
 }
 
-std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createClientStreamSync(const std::string& method, const std::string& metadataJson,
-                                                                               double deadline) {
+std::shared_ptr<HybridGrpcStreamSpec>
+HybridGrpcClient::createClientStreamSync(const std::string& method, const std::string& metadataJson, double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }
@@ -215,8 +254,8 @@ std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createClientStreamSync(c
   return stream;
 }
 
-std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createBidiStreamSync(const std::string& method, const std::string& metadataJson,
-                                                                             double deadline) {
+std::shared_ptr<HybridGrpcStreamSpec>
+HybridGrpcClient::createBidiStreamSync(const std::string& method, const std::string& metadataJson, double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }
@@ -226,8 +265,8 @@ std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createBidiStreamSync(con
   return stream;
 }
 
-std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createClientStream(const std::string& method, const std::string& metadataJson,
-                                                                           double deadline) {
+std::shared_ptr<HybridGrpcStreamSpec>
+HybridGrpcClient::createClientStream(const std::string& method, const std::string& metadataJson, double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }
@@ -237,8 +276,8 @@ std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createClientStream(const
   return stream;
 }
 
-std::shared_ptr<HybridGrpcStreamSpec> HybridGrpcClient::createBidiStream(const std::string& method, const std::string& metadataJson,
-                                                                         double deadline) {
+std::shared_ptr<HybridGrpcStreamSpec>
+HybridGrpcClient::createBidiStream(const std::string& method, const std::string& metadataJson, double deadline) {
   if (_closed || !_channel) {
     throw std::runtime_error("Channel is closed");
   }

@@ -236,4 +236,10 @@ export interface ChannelOptions {
    * Advanced: Custom channel factory function.
    */
   'channelFactoryOverride'?: unknown;
+
+  /**
+   * Service configuration object.
+   * Will be serialized to JSON and passed as 'grpc.service_config'.
+   */
+  'serviceConfig'?: Record<string, unknown>;
 }

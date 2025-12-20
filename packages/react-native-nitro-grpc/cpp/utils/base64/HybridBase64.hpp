@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HybridBase64Spec.hpp"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -8,7 +9,7 @@
 namespace margelo::nitro::grpc {
 
 class HybridBase64 : public HybridBase64Spec {
- public:
+public:
   HybridBase64() : HybridObject(TAG) {}
 
   std::string encode(const std::shared_ptr<ArrayBuffer>& data, bool urlSafe) override;

@@ -7,7 +7,8 @@ BearerTokenPlugin::BearerTokenPlugin(const std::string& token) : _staticToken(to
 BearerTokenPlugin::BearerTokenPlugin(std::function<std::string()> tokenProvider)
     : _tokenProvider(std::move(tokenProvider)), _useProvider(true) {}
 
-::grpc::Status BearerTokenPlugin::GetMetadata(::grpc::string_ref service_url, ::grpc::string_ref method_name,
+::grpc::Status BearerTokenPlugin::GetMetadata(::grpc::string_ref service_url,
+                                              ::grpc::string_ref method_name,
                                               const ::grpc::AuthContext& channel_auth_context,
                                               std::multimap<::grpc::string, ::grpc::string>* metadata) {
   try {

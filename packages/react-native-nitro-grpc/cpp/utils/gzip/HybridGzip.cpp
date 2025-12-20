@@ -1,4 +1,5 @@
 #include "HybridGzip.hpp"
+
 #include <iostream>
 #include <stdexcept>
 #include <vector>

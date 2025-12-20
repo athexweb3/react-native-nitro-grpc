@@ -14,7 +14,7 @@ namespace margelo::nitro::grpc {
  * Supports both static tokens and dynamic token providers for automatic refresh.
  */
 class BearerTokenPlugin : public ::grpc::MetadataCredentialsPlugin {
- public:
+public:
   /**
    * Creates a plugin with a static Bearer token.
    *
@@ -40,11 +40,12 @@ class BearerTokenPlugin : public ::grpc::MetadataCredentialsPlugin {
    * @param metadata Output map to populate with metadata
    * @return Status indicating success or failure
    */
-  ::grpc::Status GetMetadata(::grpc::string_ref service_url, ::grpc::string_ref method_name,
+  ::grpc::Status GetMetadata(::grpc::string_ref service_url,
+                             ::grpc::string_ref method_name,
                              const ::grpc::AuthContext& channel_auth_context,
                              std::multimap<::grpc::string, ::grpc::string>* metadata) override;
 
- private:
+private:
   std::string _staticToken;
   std::function<std::string()> _tokenProvider;
   bool _useProvider;

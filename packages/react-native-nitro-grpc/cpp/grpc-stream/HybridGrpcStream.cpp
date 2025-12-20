@@ -1,6 +1,8 @@
 #include "HybridGrpcStream.hpp"
+
 #include "../metadata/MetadataConverter.hpp"
 #include "../utils/error/ErrorHandler.hpp"
+
 #include <grpcpp/support/byte_buffer.h>
 
 namespace margelo::nitro::grpc {
@@ -15,10 +17,12 @@ HybridGrpcStream::~HybridGrpcStream() {
 }
 
 // Initialize server stream
-void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel, const std::string& method,
-                                        const std::shared_ptr<ArrayBuffer>& request, const std::string& metadataJson, int64_t deadlineMs,
+void HybridGrpcStream::initServerStream(std::shared_ptr<::grpc::Channel> channel,
+                                        const std::string& method,
+                                        const std::shared_ptr<ArrayBuffer>& request,
+                                        const std::string& metadataJson,
+                                        int64_t deadlineMs,
                                         bool isSync) {
-
   _streamType = StreamType::SERVER;
   _isSync = isSync;
   _context = std::make_shared<::grpc::ClientContext>();
@@ -131,9 +135,11 @@ std::variant<nitro::NullType, std::shared_ptr<ArrayBuffer>> HybridGrpcStream::re
 }
 
 // Client Stream Init
-void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel, const std::string& method,
-                                        const std::string& metadataJson, int64_t deadlineMs, bool isSync) {
-
+void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel,
+                                        const std::string& method,
+                                        const std::string& metadataJson,
+                                        int64_t deadlineMs,
+                                        bool isSync) {
   _streamType = StreamType::CLIENT;
   _isSync = isSync;
   _context = std::make_shared<::grpc::ClientContext>();
@@ -222,9 +228,11 @@ void HybridGrpcStream::initClientStream(std::shared_ptr<::grpc::Channel> channel
 }
 
 // Bidi Stream Init
-void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel, const std::string& method, const std::string& metadataJson,
-                                      int64_t deadlineMs, bool isSync) {
-
+void HybridGrpcStream::initBidiStream(std::shared_ptr<::grpc::Channel> channel,
+                                      const std::string& method,
+                                      const std::string& metadataJson,
+                                      int64_t deadlineMs,
+                                      bool isSync) {
   _streamType = StreamType::BIDI;
   _isSync = isSync;
   _context = std::make_shared<::grpc::ClientContext>();
